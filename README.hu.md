@@ -190,8 +190,15 @@ vezérlése közben ez a mérési recept nem futtatható.
 
 ## Források és licencek
 
-A saját build/overlay/próbaprogram MIT, az Automation HAL és a késleltetésmérő
-GPL-2.0-or-later licencű. A többi összetevő megtartja saját licencét.
+A saját, önállóan írt build/overlay/próbaprogram MIT licencű.
+A LinuxCNC-ből származó Automation HAL vegyes GPL/Library GPL/LGPL feltételű;
+a fájlonkénti licencjelölések érvényesek. A késleltetésmérő GPL-2.0-or-later.
+A kernelpatchek és egyéb külső kódok megtartják az érintett eredeti kód
+licencét. Részletek a kétnyelvű [licencjegyzékben](LICENSES.md).
+
+Az EsztergaDRO külön alkalmazás, nem része ennek a repónak vagy a generikus
+SD-képnek. A ninjaLinux nyilvánossá tétele nem teszi nyilvánossá az alkalmazás
+privát repóját.
 Lásd [LICENSE](LICENSE), [külső források](third_party/README.hu.txt),
 [licenc- és forrásgyűjtési leírás](docs/LICENC-ALLAPOT.hu.txt).
 

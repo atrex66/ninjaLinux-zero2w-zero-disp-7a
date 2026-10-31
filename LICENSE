@@ -24,3 +24,8 @@ This license covers the project's original build scripts, overlays and demo.
 Third-party software, including components/automation-hal,
 components/ninja-latency, third_party, Linux, Qt/PySide, Mesa and firmware,
 retains its own licenses and copyright notices.
+
+This scope excludes code copied or derived from third-party projects and
+patches to such code, which remain subject to their applicable original
+licenses. This is not a license for the complete operating-system image.
+See LICENSES.md for component-specific terms and binary distribution notes.

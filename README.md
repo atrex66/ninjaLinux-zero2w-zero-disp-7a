@@ -186,8 +186,16 @@ be run while controlling physical machinery.
 
 ## Sources and licenses
 
-Original project scripts/overlay/demo: MIT. Automation HAL and latency
-component: GPL-2.0-or-later. Other components retain their own licenses.
+Original, independently authored project build scripts/overlay/demo: MIT.
+LinuxCNC-derived Automation HAL contains mixed GPL/Library GPL/LGPL terms;
+the license notice in each source file applies. The latency component is
+GPL-2.0-or-later. Kernel patches and other third-party code retain the
+licenses of the code they modify or include. See the bilingual
+[component license inventory](LICENSES.md).
+
+EsztergaDRO is a separate application and is not included in this repository
+or its generic SD image. Publishing ninjaLinux does not publish its private
+application repository.
 See [LICENSE](LICENSE), [third-party notes](third_party/README.hu.txt), and
 [source/license collection notes](docs/LICENC-ALLAPOT.hu.txt).
 

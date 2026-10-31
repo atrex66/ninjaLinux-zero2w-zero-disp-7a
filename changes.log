@@ -1,5 +1,15 @@
 ninjaLinux-zero2w-zero-disp-7a - changes / változások
 
+2026-10-31 - Public source licensing / Nyilvános forrás licencei
+  EN: Keep MIT for independently authored ninjaLinux code. Document the
+      per-file GPL/Library GPL/LGPL terms of HAL, upstream kernel/patch
+      licenses and binary corresponding-source obligations. Include full
+      GPL v2, Library GPL v2 and LGPL v2.1 texts. EsztergaDRO remains separate.
+  HU: A saját önálló ninjaLinux-kód MIT marad. Pontosított fájlonkénti
+      GPL/Library GPL/LGPL HAL-jelölések, eredeti kernel-/patchlicencek és
+      bináris forráskiadási feltételek. Teljes GPL v2, Library GPL v2 és
+      LGPL v2.1 szövegek. Az EsztergaDRO külön projekt marad.
+
 2026-10-31 - Optional local Wi-Fi / Választható helyi Wi-Fi
   EN: Add rt-wifi client and rt-wifi-ap local hand-controller AP build
       profiles, separate output trees and image names. Keep the default RT
