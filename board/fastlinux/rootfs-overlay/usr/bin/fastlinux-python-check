@@ -1,0 +1,23 @@
+#!/usr/bin/python3
+import json,sys,os
+if "--offscreen" in sys.argv:
+    os.environ["QT_QPA_PLATFORM"]="offscreen"
+import PySide6, shiboken6
+from PySide6 import QtCore, QtGui, QtWidgets, QtNetwork, QtOpenGL, QtOpenGLWidgets
+assert QtCore.qVersion()==PySide6.__version__,(QtCore.qVersion(),PySide6.__version__)
+class Probe(QtCore.QObject):
+    fired=QtCore.Signal(int)
+p=Probe(); got=[]; p.fired.connect(got.append); p.fired.emit(42); assert got==[42]
+image=QtGui.QImage(16,16,QtGui.QImage.Format.Format_ARGB32); image.fill(QtGui.QColor('red')); assert image.pixelColor(0,0).red()==255
+widget_test=False
+if '--offscreen' in sys.argv:
+    app=QtWidgets.QApplication([])
+    button=QtWidgets.QPushButton('ARM64 PySide6')
+    clicked=[]; button.clicked.connect(lambda: clicked.append(True)); button.click()
+    button.resize(240,80)
+    canvas=QtGui.QImage(button.size(),QtGui.QImage.Format.Format_ARGB32)
+    canvas.fill(QtCore.Qt.GlobalColor.transparent); button.render(canvas)
+    QtCore.QTimer.singleShot(0,app.quit); assert app.exec()==0
+    assert clicked==[True] and not canvas.isNull()
+    widget_test=True
+print(json.dumps({'offscreen_widget_test':widget_test,'python':sys.version.split()[0],'pyside':PySide6.__version__,'qt':QtCore.qVersion(),'shiboken':shiboken6.__version__,'modules':['Core','Gui','Widgets','Network','OpenGL','OpenGLWidgets'],'signal_test':True,'qimage_test':True}))

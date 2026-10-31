@@ -1,0 +1,55 @@
+{
+  "collected_utc": "2026-10-31T08:02:38.570436+00:00",
+  "kernel": "6.12.61-fastlinux-rt",
+  "verified_preempt_rt": true,
+  "rt_detection_note": "The raw rt-tests realtime=0 field uses the absent legacy /sys/kernel/realtime ABI. The running /proc/config.gz verifies CONFIG_PREEMPT_RT=y and uname reports PREEMPT_RT.",
+  "duration_seconds": 600,
+  "interval_us": 1000,
+  "priority": 80,
+  "policy": "SCHED_FIFO",
+  "memory_locked": true,
+  "cpu_isolation": false,
+  "irq_patch_installed": false,
+  "gui": "PySide6 EGLFS/KMS OpenGL VC4 V3D 2.1",
+  "gui_pid_before_and_after": 182,
+  "samples": 2399892,
+  "max_latency_us": 398,
+  "per_cpu": {
+    "0": {
+      "cycles": 600000,
+      "min": 7,
+      "max": 398,
+      "avg": 14.13,
+      "cpu": 0,
+      "node": -1
+    },
+    "1": {
+      "cycles": 599982,
+      "min": 7,
+      "max": 294,
+      "avg": 12.99,
+      "cpu": 1,
+      "node": -1
+    },
+    "2": {
+      "cycles": 599964,
+      "min": 7,
+      "max": 310,
+      "avg": 11.47,
+      "cpu": 2,
+      "node": -1
+    },
+    "3": {
+      "cycles": 599946,
+      "min": 7,
+      "max": 360,
+      "avg": 11.92,
+      "cpu": 3,
+      "node": -1
+    }
+  },
+  "temperature": "unavailable; CONFIG_THERMAL is disabled",
+  "ethernet_stress": "not_run; periodic SSH status reads only",
+  "hal": "not_installed",
+  "raw_results": "graphics-10m.json"
+}

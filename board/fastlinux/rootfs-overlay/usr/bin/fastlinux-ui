@@ -1,0 +1,44 @@
+#!/bin/sh
+export QT_QPA_PLATFORM=eglfs
+export QT_QPA_EGLFS_INTEGRATION=eglfs_kms
+export QT_QPA_EGLFS_HIDECURSOR=1
+export QT_QPA_FONTDIR=/usr/share/fonts/dejavu
+export XDG_CACHE_HOME=/data/cache
+export XDG_CONFIG_HOME=/data/config
+export XDG_DATA_HOME=/data/appdata
+export XDG_RUNTIME_DIR=/run/qt
+mkdir -p "$XDG_RUNTIME_DIR"
+chmod 700 "$XDG_RUNTIME_DIR"
+# Wait for a KMS connector, without assuming that card0 is the VC4 device.
+n=0
+while [ "$n" -lt 150 ]; do
+ for c in /sys/class/drm/card*-HDMI-A-*; do
+  [ -f "$c/status" ] || continue
+  connector="${c##*/}"
+  card="${connector%%-*}"
+  [ -c "/dev/dri/$card" ] || continue
+  printf '{"device":"/dev/dri/%s"}\n' "$card" > "$XDG_RUNTIME_DIR/kms.json"
+  export QT_QPA_EGLFS_KMS_CONFIG="$XDG_RUNTIME_DIR/kms.json"
+  break 2
+ done
+ n=$((n+1)); sleep 0.1
+done
+mode="$(cat /data/ui-mode 2>/dev/null || true)"
+case "$mode" in
+ cpp) app=/usr/bin/fastlinux-demo;;
+ *) app=/usr/bin/fastlinux-pyside-demo;;
+esac
+if [ "$(cat /sys/devices/system/cpu/isolated 2>/dev/null)" = 2-3 ]; then
+ taskset -c 2 "$app" >>/tmp/fastlinux-ui.log 2>&1 &
+else
+ "$app" >>/tmp/fastlinux-ui.log 2>&1 &
+fi
+ui_pid=$!
+printf '%s\n' "$ui_pid" > /run/fastlinux-ui.pid
+trap 'kill "$ui_pid" 2>/dev/null || true; wait "$ui_pid" 2>/dev/null || true; exit 0' INT TERM
+wait "$ui_pid"
+status=$?
+rm -f /run/fastlinux-ui.pid
+printf 'UI exit=%s\n' "$status" >>/tmp/fastlinux-ui.log
+sleep 2
+exit "$status"

@@ -1,0 +1,10 @@
+#!/bin/sh
+case "$1" in start) ;; *) exit 0;; esac
+grep -q 'ninjalinux_irq_test=1' /proc/cmdline || exit 0
+# Firmware tryboot is one-shot: an unconfirmed test returns to the original config.
+(
+ sleep 180
+ [ -e /run/ninjalinux-irq-confirmed ] && exit 0
+ printf 'Unconfirmed IRQ test; returning to baseline boot\n' >> /tmp/irq-test-guard.log
+ reboot
+) >/dev/null 2>&1 &

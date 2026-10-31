@@ -1,0 +1,4 @@
+CONFIG_LOCALVERSION="-fastlinux-normal"
+# CONFIG_PREEMPT_RT is not set
+CONFIG_PREEMPT=y
+# CONFIG_PREEMPT_DYNAMIC is not set

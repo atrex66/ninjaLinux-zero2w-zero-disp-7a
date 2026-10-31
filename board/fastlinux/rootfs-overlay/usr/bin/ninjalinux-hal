@@ -1,0 +1,17 @@
+#!/bin/sh
+set -eu
+if [ "$(id -u)" != 0 ]; then
+ echo 'Run this administrator launcher as root; HAL itself runs as ahal.' >&2
+ exit 1
+fi
+case "${1:-}" in
+ start)
+  config="${2:-/data/hal/logic.hal}"
+  [ -f "$config" ] || { echo "Missing configuration: $config" >&2; exit 1; }
+  # Pass the filename as an argument, never as interpolated shell source.
+  ulimit -r 99
+  ulimit -l unlimited
+  exec su -p -s /bin/sh ahal -c 'exec /opt/automation-hal/bin/ahal run --mode realtime --cpu-config /opt/automation-hal/share/automation-hal/cpu-layout.json "$1"' sh "$config"
+  ;;
+ *) echo 'Usage: ninjalinux-hal start [configuration.hal]' >&2; exit 2;;
+esac

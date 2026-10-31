@@ -1,0 +1,6 @@
+patching file drivers/irqchip/irq-bcm2836.c
+PASS: 8192 mask/register cases + 128 rotations (CPU_ISOLATION=0)
+PASS: 8192 mask/register cases + 128 rotations (CPU_ISOLATION=1)
+patching file drivers/irqchip/irq-bcm2836.c
+PASS: original driver rejected: isolated CPU selected (active=f housekeeping=3 result=2)
+PASS: reverse patch restores exact source

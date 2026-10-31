@@ -1,0 +1,10 @@
+#!/bin/sh
+case "$1" in start) ;; *) exit 0;; esac
+# Baseline boots keep their original scheduling. Isolated test/release boots use this layout.
+[ "$(cat /sys/devices/system/cpu/isolated 2>/dev/null)" = 2-3 ] || exit 0
+for p in /proc/[0-9]*; do
+ [ -L "$p/exe" ] || continue
+ taskset -apc 0,1 "${p##*/}" >/dev/null 2>&1 || true
+done
+[ ! -w /sys/devices/virtual/workqueue/cpumask ] || printf '3\n' > /sys/devices/virtual/workqueue/cpumask
+printf 'CPU layout: system 0-1; UI 2; HAL 3\n'

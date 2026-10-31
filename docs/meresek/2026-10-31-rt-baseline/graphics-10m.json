@@ -1,0 +1,52 @@
+{
+  "file_version": 1,
+  "cmdline:": "cyclictest --mlockall --smp --priority=80 --interval=1000 --distance=0 --duration=10m --quiet --json=graphics-10m.json",
+  "rt_test_version:": "2.80",
+  "start_time": "Thu, 01 Jan 1970 00:02:07 +0000",
+  "end_time": "Thu, 01 Jan 1970 00:12:07 +0000",
+  "return_code": 0,
+  "sysinfo": {
+    "sysname": "Linux",
+    "nodename": "fastlinux",
+    "release": "6.12.61-fastlinux-rt",
+    "version": "#3 SMP PREEMPT_RT Sat Oct 31 08:21:30 CET 2026",
+    "machine": "aarch64",
+    "realtime": 0
+  },
+  "num_threads": 4,
+  "resolution_in_ns": 0,
+  "thread": {
+    "0": {
+      "cycles": 600000,
+      "min": 7,
+      "max": 398,
+      "avg": 14.13,
+      "cpu": 0,
+      "node": -1
+    },
+    "1": {
+      "cycles": 599982,
+      "min": 7,
+      "max": 294,
+      "avg": 12.99,
+      "cpu": 1,
+      "node": -1
+    },
+    "2": {
+      "cycles": 599964,
+      "min": 7,
+      "max": 310,
+      "avg": 11.47,
+      "cpu": 2,
+      "node": -1
+    },
+    "3": {
+      "cycles": 599946,
+      "min": 7,
+      "max": 360,
+      "avg": 11.92,
+      "cpu": 3,
+      "node": -1
+    }
+  }
+}

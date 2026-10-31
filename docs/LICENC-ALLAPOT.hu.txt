@@ -1,0 +1,27 @@
+Kiadási forrás- és licencgyűjtemény, 2026-10-31
+
+A scripts/collect-legal-info.sh a Buildroot legal-info gyűjteményét a helyi
+artifacts/legal-info alá készíti. A target/host manifesztek, licencek,
+letöltött eredeti források, alkalmazott patchek, Buildroot-konfiguráció és
+ellenőrzőösszegek ott találhatók. A Buildroot eredeti gyűjtőjelentése
+változatlanul megmarad, benne az automatikus gyűjtés korlátaival.
+
+A Buildroot forrását és a projekt saját forrásait a kiegészítő
+project-sources könyvtár tartalmazza. A projektforrás-archívum nem tartalmaz
+mentést, személyes SSH-kulcsot, helyi naplókat vagy teljes eredeti SD-t.
+A HAL, Boost-fejlécek és Yapps forrása/licence a projektben is megtalálható.
+
+A külső Bootlin SDK miatt a Buildroot önmagában nem gyűjti ki a célra
+másolt glibc/libgcc/libstdc++ forrásait és licenceit. Ezeket a
+scripts/collect-toolchain-sources.py gyűjti a pontos SDK Buildroot-commit
+hash-fájljai alapján, SHA256 vagy SHA512 ellenőrzéssel. A teljes GCC/glibc
+és kapcsolódó kernelheader forrásarchívumok, az SDK buildrendszerének teljes
+forrása és a gyökérlicencek a toolchain-runtime-sources könyvtárba kerülnek.
+A toolchain pontos leírása és manifesztje: docs/toolchain-bootlin/.
+
+A bináris kiadás az SD-kép mellett ezt a megfelelő forrásgyűjteményt és a
+projekt forrásverzióját is hivatkozza. A külső SDK bináris tarballját nem
+kell a célrendszer bináris kiadásába felvenni: az SDK nem része az SD-képnek.
+A teljes, helyileg készült gyűjteményből történő csomagolásnál különösen
+fontos ellenőrizni, hogy személyre szabott tesztkép ne kerüljön a generikus
+kiadási kép helyére. A végső kiadási fájllistát még ellenőrizni kell.

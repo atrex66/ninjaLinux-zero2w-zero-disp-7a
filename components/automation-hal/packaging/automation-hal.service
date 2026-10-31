@@ -1,0 +1,20 @@
+[Unit]
+Description=Standalone automation HAL
+After=local-fs.target
+ConditionPathExists=/etc/automation-hal/main.hal
+
+[Service]
+Type=simple
+User=automation-hal
+Group=automation-hal
+ExecStart=/opt/automation-hal/bin/ahal run --mode realtime /etc/automation-hal/main.hal
+KillMode=control-group
+TimeoutStopSec=15
+LimitRTPRIO=99
+LimitMEMLOCK=infinity
+NoNewPrivileges=yes
+# A failed automation program must not restart outputs without an operator decision.
+Restart=no
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,1 @@
+root=/dev/mmcblk0p2 rootwait ro rootfstype=ext4 console=tty1 quiet loglevel=3 vt.global_cursor_default=0 video=HDMI-A-1:1024x600@60D isolcpus=domain,managed_irq,2,3 irqaffinity=0,1

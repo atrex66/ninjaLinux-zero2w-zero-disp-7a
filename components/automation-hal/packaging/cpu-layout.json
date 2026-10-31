@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "system_cpus": [0, 1],
+  "ui_cpu": 2,
+  "hal_cpu": 3
+}

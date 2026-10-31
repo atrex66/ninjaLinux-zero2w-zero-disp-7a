@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.16)
+project(fastlinux-demo LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 17)
+find_package(Qt6 REQUIRED COMPONENTS Gui OpenGL)
+add_executable(fastlinux-demo main.cpp)
+target_link_libraries(fastlinux-demo PRIVATE Qt6::Gui Qt6::OpenGL)
+install(TARGETS fastlinux-demo RUNTIME DESTINATION bin)

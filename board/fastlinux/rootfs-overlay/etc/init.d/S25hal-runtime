@@ -1,0 +1,10 @@
+#!/bin/sh
+case "$1" in start) ;; *) exit 0;; esac
+# Runtime files stay on the data partition. HAL is started manually.
+mkdir -p /data/hal
+if [ ! -f /data/hal/logic.hal ]; then
+ cp /usr/share/ninjalinux/logic.hal /data/hal/logic.hal
+ chown 1000:1000 /data/hal/logic.hal
+fi
+chown 1000:1000 /data/hal
+chmod 750 /data/hal

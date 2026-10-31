@@ -1,0 +1,29 @@
+#ifndef AUTOMATION_HAL_CONFIG_H
+#define AUTOMATION_HAL_CONFIG_H
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+#define EMC2_BIN_DIR "@CMAKE_INSTALL_PREFIX@/bin"
+#define EMC2_HOME "@CMAKE_INSTALL_PREFIX@"
+#define EMC2_RTLIB_DIR "@CMAKE_INSTALL_PREFIX@/rtlib"
+#define EMC2_PO_DIR "@CMAKE_INSTALL_PREFIX@/share/locale"
+#define PACKAGE_NAME "Automation HAL"
+#define PACKAGE_VERSION "@PROJECT_VERSION@"
+#define PACKAGE_STRING "Automation HAL @PROJECT_VERSION@"
+#define MODULE_EXT ".so"
+#define RTAPI_USPACE 1
+#define HAVE_CLOCK_NANOSLEEP 1
+#define HAVE_CXX17 1
+#define HAVE_STDINT_H 1
+#define HAVE_INTTYPES_H 1
+#define HAVE_STDLIB_H 1
+#define HAVE_STRING_H 1
+#define HAVE_SYS_TYPES_H 1
+#define HAVE_SYS_STAT_H 1
+#define HAVE_UNISTD_H 1
+#define HAVE_SYS_WAIT_H 1
+#define HAVE_LOCALE_H 1
+#define HAVE_SETLOCALE 1
+#define HAVE_LIBINTL_H 1
+#define HAVE_PYTHON "@Python3_VERSION@"
+#endif

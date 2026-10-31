@@ -1,0 +1,2 @@
+# The UI waits for KMS; libinput receives later USB hotplug events.
+SETTLE_TIMEOUT=1

@@ -1,0 +1,73 @@
+Subject: [PATCH] irqchip/bcm2836: respect domain isolation during IRQ rotation
+
+The downstream IRQ rotation selects any active CPU, including CPUs
+isolated with isolcpus=domain. On a Pi Zero 2 W this routes USB and
+display interrupts onto CPUs reserved for an RT HAL thread and its
+UI.
+
+Prefer active HK_TYPE_DOMAIN housekeeping CPUs. Scan each of the
+four hardware routes once, including the current route, so a single
+eligible CPU is sufficient. If none is active, fall back to an
+active CPU to preserve IRQ delivery. Preserve the FIQ routing bits
+and all other register bits.
+
+This is a shared ARMCTRL route policy, not per-IRQ smp_affinity
+support. It does not implement CPU hotplug migration callbacks or
+suppress local IRQs/IPIs. Keep housekeeping CPUs online for the
+intended isolation.
+---
+Base: raspberrypi/linux cff533aec2fa601846766b32ff57204e0a61bed7
+Target package: 1:6.18.50-1+rpt1 (rpi-v8-rt)
+
+diff --git a/drivers/irqchip/irq-bcm2836.c b/drivers/irqchip/irq-bcm2836.c
+--- a/drivers/irqchip/irq-bcm2836.c
++++ b/drivers/irqchip/irq-bcm2836.c
+@@ -12,6 +12,7 @@
+ #include <linux/irqdomain.h>
+ #include <linux/irqchip/chained_irq.h>
+ #include <linux/irqchip/irq-bcm2836.h>
++#include <linux/sched/isolation.h>
+ 
+ #include <asm/exception.h>
+ 
+@@ -96,20 +97,34 @@
+ 	u32 i;
+ 	void __iomem *gpurouting = (intc.base + LOCAL_GPU_ROUTING);
+ 	u32 routing_val = readl(gpurouting);
+-	u32 irq_route;
++	u32 irq_route, next_route;
++	u32 fallback = 4;
+ 
+ 	/* Preserve FIQ routing bits */
+ 	irq_route = routing_val & 0x3;
+ 	routing_val &= ~0x3;
+ 
+-	for (i = 1; i <= 3; i++) {
+-		irq_route = (irq_route + i) & 0x3;
+-
+-		if (cpu_active(irq_route)) {
+-			writel(irq_route | routing_val, gpurouting);
++	/*
++	 * All ARMCTRL interrupts share this route. Keep them off CPUs excluded
++	 * by isolcpus=domain, including when the current CPU is the only active
++	 * housekeeping CPU. No allocation or sleeping is allowed in this path.
++	 */
++	for (i = 1; i <= 4; i++) {
++		next_route = (irq_route + i) & 0x3;
++		if (!cpu_active(next_route))
++			continue;
++
++		if (fallback == 4)
++			fallback = next_route;
++		if (housekeeping_test_cpu(next_route, HK_TYPE_DOMAIN)) {
++			writel(next_route | routing_val, gpurouting);
+ 			return;
+ 		}
+ 	}
++
++	/* Keep IRQ delivery working if no active housekeeping CPU remains. */
++	if (fallback < 4)
++		writel(fallback | routing_val, gpurouting);
+ }
+ EXPORT_SYMBOL(bcm2836_arm_irqchip_spin_gpu_irq);
+ 

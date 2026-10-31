@@ -1,0 +1,25 @@
+component conv_float_u32 "Convert a value from float to u32";
+pin in float in_;
+pin out u32 out;
+ pin out bit out_of_range "TRUE when 'in' is not in the range of u32";
+ param rw bit clamp """If TRUE, then clamp to the range of u32.  If FALSE, then allow the value to "wrap around".""";
+function _ "Update 'out' based on 'in'";
+license "GPL";
+author "Jeff Epler";
+
+;;
+FUNCTION(_) {
+    hal_float_t in = in_;
+    if(clamp) {
+#if 2147483647 != 0
+	if(in > 2147483647) { out = 2147483647; out_of_range = 1; return; }
+#endif
+#if 0 != -1
+	if(in < 0) { out = 0; out_of_range = 1; return; }
+#endif
+	out = in; out_of_range = 0;
+    } else {
+	out = in;
+	if(out != in) out_of_range = 1;
+    }
+}

@@ -1,0 +1,6 @@
+component sdk_probe "Standalone SDK probe";
+pin out u32 ticks;
+function _;
+license "GPL";
+;;
+FUNCTION(_) { ticks++; }

@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+case "${1:-}" in cpp|pyside) ;; *) echo 'Usage: fastlinux-select-ui cpp|pyside' >&2; exit 2;; esac
+printf '%s\n' "$1" > /data/.ui-mode.tmp
+mv /data/.ui-mode.tmp /data/ui-mode
+if [ -f /run/fastlinux-ui.pid ]; then
+ pid="$(cat /run/fastlinux-ui.pid)"
+ case "$pid" in ''|*[!0-9]*) exit 1;; esac
+ cmd="$(tr '\000' ' ' < "/proc/$pid/cmdline" 2>/dev/null || true)"
+ case "$cmd" in
+  '/usr/bin/fastlinux-demo '*|'/usr/bin/python3 /usr/bin/fastlinux-pyside-demo '*) kill -TERM "$pid" 2>/dev/null || true;;
+ esac
+fi

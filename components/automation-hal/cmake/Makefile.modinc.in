@@ -1,0 +1,26 @@
+# Standalone userspace HAL SDK. Use the target architecture toolchain.
+EMC2_HOME := @CMAKE_INSTALL_PREFIX@
+LIBDIR := $(EMC2_HOME)/lib
+RTLIBDIR := $(EMC2_HOME)/rtlib
+BUILDSYS := uspace
+RUN_IN_PLACE := no
+CC ?= cc
+LD ?= ld
+OBJDUMP ?= objdump
+EXTRA_CFLAGS += -I$(EMC2_HOME)/include -DRTAPI -DSIM -D__MODULE__ -D_GNU_SOURCE -fPIC -O2 -fno-fast-math
+allmodules = $(patsubst %.o,%.so,$(obj-m))
+getobjs = $(if $(filter undefined,$(origin $(1)-objs)),$(1).o,$($(1)-objs))
+.PHONY: modules install clean
+modules: $(allmodules)
+$(foreach mod,$(patsubst %.o,%,$(obj-m)),$(eval $(mod).so: $(call getobjs,$(mod))))
+%.o: %.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -c $< -o $@
+%.so:
+	$(LD) -r -o $*.tmp $^
+	$(OBJDUMP) -w -j .rtapi_export -t $*.tmp | awk 'BEGIN{print "{ global :"} /rtapi_exported_/{printf("%s;\n", substr($$6,16))} END{print "local : * ; };"}' > $*.ver
+	$(CC) -shared -Wl,-Bsymbolic -Wl,--version-script,$*.ver $(LDFLAGS) -o $@ $^ -lm
+install: modules
+	install -d $(DESTDIR)$(RTLIBDIR)
+	install -m 644 $(allmodules) $(DESTDIR)$(RTLIBDIR)/
+clean:
+	rm -f $(allmodules) *.o *.tmp *.ver

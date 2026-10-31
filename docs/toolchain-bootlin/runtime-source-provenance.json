@@ -1,0 +1,30 @@
+{
+  "bootlin_buildroot_commit": "83947c7bb6158072bc2f52b58e90891cd3dc04a2",
+  "toolchain": "aarch64--glibc--stable-2025.08-1",
+  "files": [
+    {
+      "name": "bootlin-buildroot-83947c7bb6158072bc2f52b58e90891cd3dc04a2.tar.gz",
+      "url": "https://codeload.github.com/bootlin/buildroot-toolchains/tar.gz/83947c7bb6158072bc2f52b58e90891cd3dc04a2",
+      "sha256": "82cc11f696e549b01cc2c069d5d57101013848a9608250191e1d910d61b42f7a",
+      "bytes": 6975479
+    },
+    {
+      "name": "glibc-2.41-70-g1502c248d58cb99a203731707987a4342926e830.tar.gz",
+      "url": "https://toolchains.bootlin.com/downloads/releases/sources/glibc-2.41-70-g1502c248d58cb99a203731707987a4342926e830/glibc-2.41-70-g1502c248d58cb99a203731707987a4342926e830.tar.gz",
+      "sha256": "166b6e7637bb45cb9352e4813005f83dd48f03ef634d3e9e94a30aa5a0300fab",
+      "bytes": 38626222
+    },
+    {
+      "name": "gcc-14.3.0.tar.xz",
+      "url": "https://mirrors.kernel.org/gnu/gcc/gcc-14.3.0/gcc-14.3.0.tar.xz",
+      "sha256": "e0dc77297625631ac8e50fa92fffefe899a4eb702592da5c32ef04e2293aca3a",
+      "bytes": 95212220
+    },
+    {
+      "name": "linux-5.4.296.tar.xz",
+      "url": "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.4.296.tar.xz",
+      "sha256": "3d63614e58bf1befaba3f5713145200d09f26e564832c8948094fdf5b11fa73a",
+      "bytes": 113049108
+    }
+  ]
+}

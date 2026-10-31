@@ -1,0 +1,5 @@
+#!/usr/bin/python3
+# Preserve argv[0] under bin/: upstream derives the SDK prefix from that path.
+from pathlib import Path
+source = Path('@CMAKE_INSTALL_PREFIX@/share/automation-hal/halcompile.py')
+exec(compile(source.read_bytes(), str(source), 'exec'))

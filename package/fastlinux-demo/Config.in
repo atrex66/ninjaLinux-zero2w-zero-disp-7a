@@ -1,0 +1,3 @@
+config BR2_PACKAGE_FASTLINUX_DEMO
+ bool "FastLinux native GPU/touch demo"
+ depends on BR2_PACKAGE_QT6BASE_GUI && BR2_PACKAGE_QT6BASE_OPENGL

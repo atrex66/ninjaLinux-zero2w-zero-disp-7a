@@ -1,0 +1,323 @@
+{
+  "validated": true,
+  "kernel": "6.12.61-ninjalinux-rt-irq1",
+  "period_us": 1000,
+  "sample_count": 131023,
+  "observed_window_s": 131.05102250199997,
+  "max_absolute_period_error_us": 45.677,
+  "mean_absolute_period_error_us": 1.6938570708959497,
+  "long_intervals_ge_two_periods": 0,
+  "network_payload_bytes": 73400320,
+  "armctrl_irq_deltas": {
+    "2": {
+      "counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "description": "ARMCTRL-level 1 Edge 3f00b880.mailbox"
+    },
+    "51": {
+      "counts": [
+        685770,
+        686238,
+        0,
+        0
+      ],
+      "description": "ARMCTRL-level 41 Edge 3f980000.usb, dwc2_hsotg:usb1"
+    },
+    "52": {
+      "counts": [
+        15752,
+        15504,
+        0,
+        0
+      ],
+      "description": "ARMCTRL-level 42 Edge vc4"
+    },
+    "53": {
+      "counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "description": "ARMCTRL-level 43 Edge 3f004000.txp"
+    },
+    "60": {
+      "counts": [
+        11,
+        11,
+        0,
+        0
+      ],
+      "description": "ARMCTRL-level 50 Edge DMA IRQ"
+    },
+    "75": {
+      "counts": [
+        3979,
+        3860,
+        0,
+        0
+      ],
+      "description": "ARMCTRL-level 65 Edge vc4 hvs"
+    },
+    "84": {
+      "counts": [
+        3970,
+        3869,
+        0,
+        0
+      ],
+      "description": "ARMCTRL-level 74 Edge vc4 crtc"
+    },
+    "87": {
+      "counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "description": "ARMCTRL-level 77 Edge vc4 crtc"
+    },
+    "88": {
+      "counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "description": "ARMCTRL-level 78 Edge vc4 crtc"
+    },
+    "95": {
+      "counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "description": "ARMCTRL-level 85 Edge 3f805000.i2c"
+    },
+    "98": {
+      "counts": [
+        9,
+        9,
+        0,
+        0
+      ],
+      "description": "ARMCTRL-level 88 Edge mmc0"
+    }
+  },
+  "all_irq_deltas": {
+    "2": {
+      "counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "description": "ARMCTRL-level 1 Edge 3f00b880.mailbox"
+    },
+    "51": {
+      "counts": [
+        685770,
+        686238,
+        0,
+        0
+      ],
+      "description": "ARMCTRL-level 41 Edge 3f980000.usb, dwc2_hsotg:usb1"
+    },
+    "52": {
+      "counts": [
+        15752,
+        15504,
+        0,
+        0
+      ],
+      "description": "ARMCTRL-level 42 Edge vc4"
+    },
+    "53": {
+      "counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "description": "ARMCTRL-level 43 Edge 3f004000.txp"
+    },
+    "60": {
+      "counts": [
+        11,
+        11,
+        0,
+        0
+      ],
+      "description": "ARMCTRL-level 50 Edge DMA IRQ"
+    },
+    "75": {
+      "counts": [
+        3979,
+        3860,
+        0,
+        0
+      ],
+      "description": "ARMCTRL-level 65 Edge vc4 hvs"
+    },
+    "84": {
+      "counts": [
+        3970,
+        3869,
+        0,
+        0
+      ],
+      "description": "ARMCTRL-level 74 Edge vc4 crtc"
+    },
+    "87": {
+      "counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "description": "ARMCTRL-level 77 Edge vc4 crtc"
+    },
+    "88": {
+      "counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "description": "ARMCTRL-level 78 Edge vc4 crtc"
+    },
+    "95": {
+      "counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "description": "ARMCTRL-level 85 Edge 3f805000.i2c"
+    },
+    "98": {
+      "counts": [
+        9,
+        9,
+        0,
+        0
+      ],
+      "description": "ARMCTRL-level 88 Edge mmc0"
+    },
+    "180": {
+      "counts": [
+        10592,
+        13821,
+        28714,
+        148103
+      ],
+      "description": "bcm2836-timer 1 Edge arch_timer"
+    },
+    "183": {
+      "counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "description": "bcm2836-pmu 9 Edge arm-pmu"
+    },
+    "IPI0": {
+      "counts": [
+        705939,
+        705089,
+        22949,
+        0
+      ],
+      "description": "Rescheduling interrupts"
+    },
+    "IPI1": {
+      "counts": [
+        29356,
+        28920,
+        0,
+        0
+      ],
+      "description": "Function call interrupts"
+    },
+    "IPI2": {
+      "counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "description": "CPU stop interrupts"
+    },
+    "IPI3": {
+      "counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "description": "CPU stop NMIs"
+    },
+    "IPI4": {
+      "counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "description": "Timer broadcast interrupts"
+    },
+    "IPI5": {
+      "counts": [
+        19219,
+        24415,
+        1,
+        218
+      ],
+      "description": "IRQ work interrupts"
+    },
+    "IPI6": {
+      "counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "description": "CPU backtrace interrupts"
+    },
+    "IPI7": {
+      "counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "description": "KGDB roundup interrupts"
+    }
+  },
+  "rt_threads": [
+    {
+      "pid": 341,
+      "tid": 348,
+      "comm": "rtapi_app:T#0",
+      "policy": 1,
+      "priority": 98,
+      "cpus": [
+        3
+      ]
+    }
+  ],
+  "same_boot": true,
+  "limitations": [
+    "Short software-only HAL trial; no physical motion I/O.",
+    "Period error is not cyclictest wake-up latency.",
+    "Local timer and IPIs remain; NO_HZ_FULL/RCU offload disabled.",
+    "No target CPU temperature reading; no worst-case guarantee.",
+    "No controlled touch stimulus or sustained SD stress in this trial."
+  ]
+}

@@ -1,0 +1,18 @@
+PYSIDE_GENERATOR_VERSION = 6.11.2
+PYSIDE_GENERATOR_SOURCE = shiboken6_generator-$(PYSIDE_GENERATOR_VERSION)-cp310-abi3-manylinux_2_34_x86_64.whl
+PYSIDE_GENERATOR_SITE = https://download.qt.io/official_releases/QtForPython/shiboken6-generator
+PYSIDE_GENERATOR_LICENSE = GPL-3.0 with exception
+HOST_PYSIDE_GENERATOR_ACTUAL_SOURCE_TARBALL = pyside-setup-everywhere-src-$(PYSIDE_GENERATOR_VERSION).tar.xz
+HOST_PYSIDE_GENERATOR_ACTUAL_SOURCE_SITE = https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-$(PYSIDE_GENERATOR_VERSION)-src
+HOST_PYSIDE_GENERATOR_LICENSE_FILES = LICENSES/GPL-3.0-only.txt LICENSES/Qt-GPL-exception-1.0.txt
+define HOST_PYSIDE_GENERATOR_PREPARE_LICENSES
+	tar -xJf $(HOST_PYSIDE_GENERATOR_DL_DIR)/$(HOST_PYSIDE_GENERATOR_ACTUAL_SOURCE_TARBALL) \
+	 -C $(HOST_PYSIDE_GENERATOR_DIR) --strip-components=1 --wildcards '*/LICENSES/*'
+endef
+HOST_PYSIDE_GENERATOR_PRE_LEGAL_INFO_HOOKS += HOST_PYSIDE_GENERATOR_PREPARE_LICENSES
+HOST_PYSIDE_GENERATOR_EXTRACT_CMDS = unzip -q $(HOST_PYSIDE_GENERATOR_DL_DIR)/$(HOST_PYSIDE_GENERATOR_SOURCE) -d $(@D)
+define HOST_PYSIDE_GENERATOR_INSTALL_CMDS
+ mkdir -p $(HOST_DIR)/share/fastlinux/shiboken
+ cp -a $(@D)/shiboken6_generator $(HOST_DIR)/share/fastlinux/shiboken/
+endef
+$(eval $(host-generic-package))

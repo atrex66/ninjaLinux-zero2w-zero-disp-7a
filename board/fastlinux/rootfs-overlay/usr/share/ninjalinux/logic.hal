@@ -1,0 +1,9 @@
+# Software-only functional example; no physical motion output.
+loadrt threads name1=automation-thread period1=1000000
+loadrt and2 count=1
+loadrt timedelay count=1
+setp timedelay.0.on-delay 0.02
+net permitted and2.0.out => timedelay.0.in
+addf and2.0 automation-thread
+addf timedelay.0 automation-thread
+start

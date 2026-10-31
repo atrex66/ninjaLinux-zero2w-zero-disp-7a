@@ -1,0 +1,17 @@
+make: Entering directory '/tmp/ahal-irq-patch/source/linux-cff533aec2fa601846766b32ff57204e0a61bed7'
+make[1]: Entering directory '/tmp/ahal-irq-patch/build'
+  GEN     Makefile
+  LEX     scripts/kconfig/lexer.lex.c
+  YACC    scripts/kconfig/parser.tab.[ch]
+  HOSTCC  scripts/kconfig/lexer.lex.o
+  HOSTCC  scripts/kconfig/menu.o
+  HOSTCC  scripts/kconfig/parser.tab.o
+  HOSTCC  scripts/kconfig/preprocess.o
+  HOSTCC  scripts/kconfig/symbol.o
+  HOSTCC  scripts/kconfig/util.o
+  HOSTLD  scripts/kconfig/conf
+#
+# configuration written to .config
+#
+make[1]: Leaving directory '/tmp/ahal-irq-patch/build'
+make: Leaving directory '/tmp/ahal-irq-patch/source/linux-cff533aec2fa601846766b32ff57204e0a61bed7'

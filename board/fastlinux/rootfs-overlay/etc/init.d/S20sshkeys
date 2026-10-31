@@ -1,0 +1,25 @@
+#!/bin/sh
+set -eu
+case "$1" in start) ;; *) exit 0;; esac
+# A missing data mount is an error; do not write into the read-only root.
+mountpoint -q /data || exit 1
+umask 077
+mkdir -p /data/ssh
+chmod 700 /data/ssh
+if [ ! -s /data/ssh/dropbear_ed25519_host_key ]; then
+ /usr/bin/dropbearkey -t ed25519 -f /data/ssh/dropbear_ed25519_host_key.new >/run/ssh-keygen.log 2>&1
+ mv /data/ssh/dropbear_ed25519_host_key.new /data/ssh/dropbear_ed25519_host_key
+fi
+# Optional first-boot administrator key, supplied on the FAT boot partition.
+if [ ! -e /data/ssh/authorized_keys ]; then
+ mkdir -p /run/ssh-provision
+ if mount -t vfat -o ro /dev/mmcblk0p1 /run/ssh-provision; then
+  if [ -s /run/ssh-provision/authorized_keys ]; then
+   cp /run/ssh-provision/authorized_keys /data/ssh/authorized_keys.new
+   chmod 600 /data/ssh/authorized_keys.new
+   mv /data/ssh/authorized_keys.new /data/ssh/authorized_keys
+  fi
+  umount /run/ssh-provision
+ fi
+fi
+sync

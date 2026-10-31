@@ -1,0 +1,11 @@
+/vendor/
+/backups/
+/logs/
+/artifacts/
+/recovered/
+*.partial
+board/fastlinux/rootfs-overlay/etc/dropbear/*_host_key
+board/fastlinux/rootfs-overlay/root/.ssh/authorized_keys
+
+__pycache__/
+*.pyc

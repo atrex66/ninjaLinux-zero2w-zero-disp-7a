@@ -1,0 +1,9 @@
+#!/bin/sh
+# Private commands and Python module; never add these to the global environment.
+AHAL_PREFIX='@CMAKE_INSTALL_PREFIX@'
+export AHAL_PREFIX
+PATH="$AHAL_PREFIX/bin:$PATH"
+PYTHONPATH="$AHAL_PREFIX/lib/python${PYTHONPATH:+:$PYTHONPATH}"
+PYTHONDONTWRITEBYTECODE=1
+export PATH PYTHONPATH PYTHONDONTWRITEBYTECODE
+exec /usr/bin/python3 "$AHAL_PREFIX/libexec/runner.py" "$@"

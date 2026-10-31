@@ -1,0 +1,17 @@
+#!/bin/sh
+set -eu
+printf 'Kernel: '; uname -r
+# Mainline PREEMPT_RT kernels may omit the older /sys/kernel/realtime ABI.
+if [ -r /sys/kernel/realtime ]; then
+ rt="$(cat /sys/kernel/realtime)"
+elif [ -r /proc/config.gz ] && zcat /proc/config.gz | grep -q '^CONFIG_PREEMPT_RT=y$'; then
+ rt=1
+else
+ rt=0
+fi
+if [ "$rt" != 1 ]; then
+ echo 'PREEMPT_RT is not active; realtime test refused.' >&2
+ exit 1
+fi
+# 1 kHz, one worker per CPU, SCHED_FIFO 80, locked memory; run manually.
+exec cyclictest --mlockall --smp --priority=80 --interval=1000 --distance=0 --duration="${1:-10m}" --quiet

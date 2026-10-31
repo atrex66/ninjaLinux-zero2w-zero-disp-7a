@@ -1,0 +1,44 @@
+ninjaLinux for Zero 2 W and Zero-DISP-7A — kiadási adatok
+2026-10-31
+
+Privát GitHub-repó (felhasználó által kért láthatóság):
+https://github.com/atrex66/ninjaLinux-zero2w-zero-disp-7a
+Főág: main. Kiadásra jelölt változat: v0.1.0-rc1.
+
+Ellenőrzött cél: Raspberry Pi Zero 2 W + Waveshare Zero-DISP-7A.
+Kizárólag PREEMPT_RT kernel: 6.12.61-ninjalinux-rt-irq1.
+Python/PySide6, EGLFS/KMS, VC4 V3D2.1, USB érintés, RTL8152 Ethernet.
+CPU0-1 rendszer/eszköz-IRQ, CPU2 GUI, CPU3 önálló HAL, SCHED_FIFO98.
+A teljes új SD-kép fizikai boot-, érintési, kulcsos SSH- és HAL-próbája sikeres.
+Első képkocka: 8,02 s kernel-uptime egyetlen booton.
+
+A teljes SD-kép HAL/GUI/Ethernet próbája:
+131019 ciklus, 1 ms periódus, 70 MiB hálózati adat, kb.131,047 s ablak.
+37,708 us maximum és 1,895796 us átlagos abszolút periódushiba.
+CPU2-3-on nulla ARMCTRL eszköz-IRQ növekmény, CPU0-1-en1371688 USB IRQ.
+A boot és GUI folytonos; a HAL a próba után is működik.
+Mindkét nyelvű README tartalmazza a korábbi fejlesztői HAL-mérést és az
+eltérő metrikájú cyclictest alapmérést is, a körülményekkel és korlátokkal.
+
+A forrás Gitbe kerülő részei:
+Buildroot external projekt, board/kernelconfig/IRQ-patch, HAL-forrás,
+PySide6 csomagolás, harmadik féltől származó fordítási forrásfüggőségek,
+fordító/ellenőrző/forrásgyűjtő segédek, angol és magyar README, mérési adatok.
+Nem részei: eredeti SD-mentések, személyes kulcsok, személyre szabott tesztkép,
+helyi naplók, régi SD teljes tartalma, helyi vendor/build/artifacts mappák.
+
+Bináris kiadási fájlok:
+- Generikus RT+HAL SD-kép (65,4 MiB gzip), beépített adminisztrátori kulcs
+  és közös privát SSH-hostkulcs nélkül. Saját hostkulcs az első booton.
+- SHA256 és a projektforrás pontos Git-commit azonosítója.
+- A megfelelő források és licencek külön csomagja: Buildroot, projektforrás,
+  csomagforrások, patchek, licencek és a külső SDK célkönyvtárainak forrásai.
+A kiadás összeállítását scripts/package-release.sh végzi a sikeres fizikai
+elfogadási jelentés és tiszta, commitolt forrás ellenőrzése után.
+
+További alkalmazási vizsgálatok, amelyekre nincs kész eredmény:
+Másik gépes teljes tiszta újraépítés, hosszú ismételt HAL-teszt, tartós SD-
+stressz, vezérelt érintési terhelés és tényleges fizikai HAL I/O.
+Hőmérséklet-olvasat nem volt; NO_HZ_FULL/RCU offload nincs bekapcsolva.
+Helyi időzítő/IPI megmarad. Teljes megszakításmentességet és garantált
+legrosszabb eseti késleltetést a kiadás nem állít.

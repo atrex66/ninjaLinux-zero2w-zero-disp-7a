@@ -1,0 +1,7 @@
+config BR2_PACKAGE_AUTOMATION_HAL
+ bool "Standalone Automation HAL"
+ depends on BR2_PACKAGE_PYTHON3
+ depends on BR2_PACKAGE_EUDEV
+ help
+   Private LinuxCNC-derived HAL runtime and Python binding.
+   No motion hardware driver or automatic HAL startup is enabled.

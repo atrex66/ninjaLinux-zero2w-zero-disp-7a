@@ -1,0 +1,23 @@
+#!/usr/bin/python3
+"""Confirm a working one-shot test and stop its boot-only hardware watchdog."""
+import os
+from pathlib import Path
+import platform
+if os.getuid()!=0 or platform.release()!='6.12.61-ninjalinux-rt-irq1':
+    raise SystemExit('Only the expected IRQ test kernel can be confirmed as root')
+if Path('/sys/devices/system/cpu/isolated').read_text().strip()!='2-3':
+    raise SystemExit('Expected isolated CPUs 2-3')
+if 'PYSIDE_GL_RENDERER: VC4 V3D 2.1' not in Path('/tmp/fastlinux-ui.log').read_text():
+    raise SystemExit('GPU startup not confirmed')
+if Path('/sys/class/watchdog/watchdog0/nowayout').read_text().strip()!='0':
+    raise SystemExit('Boot watchdog cannot be stopped')
+# This BCM2835 driver advertises WDIOF_MAGICCLOSE. Opening takes ownership;
+# the magic close invokes its stop operation, including a firmware-started WDT.
+fd=os.open('/dev/watchdog0',os.O_WRONLY)
+try:
+    if os.write(fd,b'V')!=1:
+        raise RuntimeError('Watchdog magic close write failed')
+finally:
+    os.close(fd)
+Path('/run/ninjalinux-irq-confirmed').touch()
+print('IRQ test confirmed; boot watchdog magic-closed')

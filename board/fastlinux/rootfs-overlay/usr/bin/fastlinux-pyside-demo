@@ -1,0 +1,39 @@
+#!/usr/bin/python3
+import sys, math
+from PySide6 import __version__
+from PySide6.QtCore import QTimer, Qt, qVersion
+from PySide6.QtGui import QColor, QPainter, QFont, QSurfaceFormat
+from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QPushButton
+from PySide6.QtOpenGLWidgets import QOpenGLWidget
+
+class Animation(QOpenGLWidget):
+    def __init__(self):
+        super().__init__(); self.angle=0.0; self.first_frame=True; self.setMinimumHeight(180)
+        self.timer=QTimer(self); self.timer.timeout.connect(self.advance); self.timer.start(16)
+    def advance(self):
+        self.angle+=0.025; self.update()
+    def initializeGL(self):
+        functions=self.context().functions(); functions.initializeOpenGLFunctions()
+        print('PYSIDE_GL_RENDERER:',functions.glGetString(0x1F01),flush=True)
+    def paintGL(self):
+        if self.first_frame:
+            with open('/proc/uptime') as f: print('PYSIDE_FIRST_FRAME_KERNEL_UPTIME:',f.read().strip(),flush=True)
+            self.first_frame=False
+        p=QPainter(self); p.fillRect(self.rect(),QColor('#091421')); p.setRenderHint(QPainter.RenderHint.Antialiasing)
+        p.setPen(Qt.PenStyle.NoPen); p.setBrush(QColor('#29c7bd'))
+        p.drawEllipse(int(self.width()/2+130*math.cos(self.angle))-25,int(self.height()/2+45*math.sin(self.angle))-25,50,50)
+
+fmt=QSurfaceFormat(); fmt.setRenderableType(QSurfaceFormat.RenderableType.OpenGLES); fmt.setVersion(2,0); fmt.setSwapInterval(1); QSurfaceFormat.setDefaultFormat(fmt)
+app=QApplication(sys.argv)
+app.setFont(QFont('DejaVu Sans',18))
+w=QWidget(); layout=QVBoxLayout(w); layout.setContentsMargins(35,25,35,25)
+layout.addWidget(QLabel('ninjaLinux / Python + PySide6'))
+layout.addWidget(QLabel(f'Python {sys.version.split()[0]} | PySide6 {__version__} | Qt {qVersion()}'))
+layout.addWidget(Animation())
+button=QPushButton('Érintési próba: 0'); button.setMinimumHeight(90); count=[0]
+def clicked():
+    count[0]+=1; button.setText(f'Érintési próba: {count[0]}')
+button.clicked.connect(clicked); layout.addWidget(button)
+w.setStyleSheet('QWidget {background:#091421;color:#f2f5f8} QPushButton {background:#204559;border-radius:12px;padding:20px}')
+w.showFullScreen(); print('PYSIDE_UI_READY',flush=True)
+sys.exit(app.exec())

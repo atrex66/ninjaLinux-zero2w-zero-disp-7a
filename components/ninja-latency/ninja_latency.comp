@@ -1,0 +1,42 @@
+component ninja_latency "HAL thread period jitter with full-cycle statistics and histogram";
+pin in bit reset;
+pin out float interval_ns;
+pin out float minimum_ns;
+pin out float maximum_ns;
+pin out float jitter_ns;
+pin out float current_error_ns;
+pin out float mean_jitter_ns;
+pin out float samples;
+pin out u32 long_intervals;
+pin out u32 histogram-##[128] "Absolute period error, 2 us bins; last bin >=254 us";
+function _;
+variable rtapi_s64 last = 0;
+variable double total_error = 0;
+license "GPL-2.0-or-later";
+;;
+rtapi_s64 now = rtapi_get_time();
+if (reset) {
+    last = 0;
+    interval_ns = minimum_ns = maximum_ns = jitter_ns = current_error_ns = 0;
+    mean_jitter_ns = samples = total_error = 0;
+    long_intervals = 0;
+    for (int i = 0; i < 128; i++) histogram(i) = 0;
+    return;
+}
+if (last != 0) {
+    rtapi_s64 delta = now - last;
+    rtapi_s64 error = delta - period;
+    rtapi_s64 absolute = error < 0 ? -error : error;
+    if (samples == 0 || delta < minimum_ns) minimum_ns = delta;
+    if (samples == 0 || delta > maximum_ns) maximum_ns = delta;
+    if (absolute > jitter_ns) jitter_ns = absolute;
+    interval_ns = delta;
+    current_error_ns = error;
+    total_error += absolute;
+    samples += 1;
+    mean_jitter_ns = total_error / samples;
+    if (delta >= 2 * (rtapi_s64)period && long_intervals < 0xffffffffU) long_intervals++;
+    int bucket = absolute >= 254000 ? 127 : (int)(absolute / 2000);
+    if (histogram(bucket) < 0xffffffffU) histogram(bucket)++;
+}
+last = now;

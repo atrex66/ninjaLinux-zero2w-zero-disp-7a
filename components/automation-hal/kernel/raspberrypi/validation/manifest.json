@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-17",
+  "target_kernel": "6.18.50+rpt-rpi-v8-rt",
+  "target_package": "1:6.18.50-1+rpt1",
+  "source_repository": "https://github.com/raspberrypi/linux",
+  "source_commit": "cff533aec2fa601846766b32ff57204e0a61bed7",
+  "source_commit_evidence": "Installed kernel package changelog.Debian.gz",
+  "original_driver_sha256": "526bd57f27e4238bce9be61f2da4b4a6079dc87f16603a067d7e0c32ffeeb32f",
+  "patched_driver_sha256": "fa79faf9a134455ede5c43f35a27abedcf7f3e25601031d6a570c4e79aadec10",
+  "patch_sha256": "cbad3135deffd20a1e5932396f8da867a6cda96c08491b0b4e8dbb955f847c6c",
+  "target_config_sha256": "cd8fa1b8b07f21d0090efdc609a15dbf32f3b93248f40b883b32d184362b3e79",
+  "build_config_sha256": "17f69a1e8822d385d411dad19710bda6f5e3e9d105611f0e475652fb5aa3e308",
+  "object_sha256": "f4e29fd819e77bd88b3058b6bf1b8de02ec7cc5a178ff09bfe3f92792700578b",
+  "compiler": "Debian clang version 19.1.7 (3+b1)",
+  "checked_config": [
+    "CONFIG_PREEMPT_RT=y",
+    "CONFIG_CPU_ISOLATION=y",
+    "CONFIG_ARM64=y",
+    "CONFIG_SMP=y",
+    "CONFIG_ARCH_BCM2835=y"
+  ],
+  "native_behavior_cases": 16384,
+  "repeated_rotation_checks": 256,
+  "original_driver_isolation_regression_reproduced": true,
+  "full_kernel_linked": false,
+  "installed": false,
+  "boot_tested": false,
+  "post_patch_hardware_latency_tested": false
+}

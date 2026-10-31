@@ -1,0 +1,8 @@
+#!/bin/sh
+# Per-card persistent host key; public-key authentication only.
+case "$1" in
+ start)
+  [ -s /data/ssh/dropbear_ed25519_host_key ] || exit 1
+  /usr/sbin/dropbear -s -g -p 22 -P /run/dropbear.pid -r /data/ssh/dropbear_ed25519_host_key;;
+ stop) [ ! -f /run/dropbear.pid ] || kill "$(cat /run/dropbear.pid)";;
+esac

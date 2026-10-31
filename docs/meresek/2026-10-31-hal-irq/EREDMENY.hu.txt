@@ -1,0 +1,40 @@
+ninjaLinux RT + önálló HAL: fizikai Zero 2 W mérés, 2026-10-31
+
+Kernel: 6.12.61-ninjalinux-rt-irq1, CONFIG_PREEMPT_RT=y.
+CPU0-1: rendszer és ARMCTRL IRQ-k; CPU2: PySide6 EGLFS/VC4 GUI;
+CPU3: Automation HAL RT-szál, SCHED_FIFO 98, 1000000 ns periódus.
+A HAL and2/timedelay funkcionális próbája FALSE -> TRUE -> FALSE sikeres.
+A Python HAL-kötés importja és komponens/pin létrehozása/írása/olvasása sikeres.
+
+131023 ciklus; megfigyelési ablak 131,051 s (kért várakozás 130 s,
+majd a HAL leállítóparancs feldolgozása és konzisztens kiolvasás).
+Legnagyobb abszolút periódushiba: 45,677 us.
+Átlagos abszolút periódushiba: 1,693857 us.
+Min./max. mért periódus: 954,323 / 1042,865 us.
+>=2 periódus hosszúságú intervallum: 0.
+A teljes hisztogram összege megegyezik a ciklusszámmal.
+
+Hálózati terhelés: 73400320 bájt (70 MiB), kb. 1 MiB/s,
+a mérés 55..125. másodperce között, USB RTL8152 Etherneten/SSH-n át.
+Valamennyi ARMCTRL eszköz-IRQ növekménye a CPU2 és CPU3 magon NULLA.
+Az USB IRQ növekménye összesen 1372008 a CPU0-1 magokon.
+A tényleges IRQ-szálak affinitása CPU0-1; a GUI CPU2; a HAL RT-szál CPU3.
+A bootazonosító változatlan, a GUI nem indult újra, a HAL a próba után fut.
+Részletek és géppel ellenőrzött feltételek: report.json,
+scripts/report-hal-probe.py; nyers adatok: hal-load1/ és context-*.json.
+
+Korlátok:
+Ez rövid szoftveres HAL-próba; fizikai mozgás/I/O nincs bekötve.
+A HAL periódushiba eltér a cyclictest ébresztési késleltetésétől, ezért a
+korábbi 398 us értékhez nem rendelünk pontos javulási arányt.
+A helyi időzítő/IPI és az IRQ-work megmarad; NO_HZ_FULL és RCU offload
+nincs engedélyezve. Teljes megszakításmentesség nincs bizonyítva.
+Hőmérséklet-olvasat, vezérelt érintési terhelés és tartós SD-stressz nem volt.
+A mért maximum nem garantált legrosszabb eseti felső korlát.
+
+Boot-watchdog javítás:
+Az első próbát firmware által indított watchdog szakította meg. Annak
+terhelési adatai érvénytelenek. A második bootban a watchdog tulajdonjogának
+átvétele és dokumentált magic-close után futott le ez a mérés, újraindulás
+nélkül. A tartós bootkonfiguráció nem engedélyez boot-watchdogot és nem
+használja az egyszeri próbához tartozó visszaállítási jelölőt.

@@ -1,0 +1,25 @@
+component conv_u32_bit "Convert a value from u32 to bit";
+pin in u32 in_;
+pin out bit out;
+ pin out bit out_of_range "TRUE when 'in' is not in the range of bit";
+ param rw bit clamp """If TRUE, then clamp to the range of bit.  If FALSE, then allow the value to "wrap around".""";
+function _ "Update 'out' based on 'in'";
+license "GPL";
+author "Jeff Epler";
+
+;;
+FUNCTION(_) {
+    hal_u32_t in = in_;
+    if(clamp) {
+#if 1 != 0
+	if(in > 1) { out = 1; out_of_range = 1; return; }
+#endif
+#if -1 != -1
+	if(in < -1) { out = -1; out_of_range = 1; return; }
+#endif
+	out = in; out_of_range = 0;
+    } else {
+	out = in;
+	if(out != in) out_of_range = 1;
+    }
+}

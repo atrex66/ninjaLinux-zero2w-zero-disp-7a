@@ -1,0 +1,48 @@
+CPU- és IRQ-izoláció: megvalósított állapot, 2026-10-31
+
+Pi Zero 2 W, 6.12.61-ninjalinux-rt-irq1, CONFIG_PREEMPT_RT=y,
+CONFIG_CPU_ISOLATION=y. CPU0-1 rendszer/eszköz-IRQ, CPU2 GUI, CPU3 HAL.
+Cmdline: isolcpus=domain,managed_irq,2,3 irqaffinity=0,1
+Az S03cpu-layout a rendszerfolyamatokat CPU0-1-re, a nem kötött
+workqueue-k cpumask értékét 3-ra állítja. A GUI külön CPU2-n indul.
+A ninjalinux-hal indító az ahal felhasználó RTAPI-szálát CPU3-ra köti;
+a tényleges futó szál SCHED_FIFO98 és Cpus_allowed_list=3 állapota mért.
+
+A korábbi hibás downstream IRQ-forgatás az aktív CPU-k között váltott,
+figyelmen kívül hagyva az izolációt. A helyreállított javítás:
+board/fastlinux/patches/linux/0001-irqchip-bcm2836-respect-domain-isolation.patch
+A kiválasztás HK_TYPE_DOMAIN housekeeping CPU-t keres; a FIQ-biteket
+megőrzi, és fallback viselkedése is ellenőrzött. A CPU0-1 magokat online
+kell tartani; a patch nem teljes CPU-hotplug migrációs megoldás.
+
+Forrás- és hardverbizonyíték:
+- 16384 maszk/regiszter eset + 256 forgatás sikeres forráspróba.
+- A kernel ténylegesen lefordult és a fizikai Pi-n bootolt.
+- A 131,051 s-os HAL/GUI/Ethernet próba során minden ARMCTRL eszköz-IRQ
+  növekménye CPU2-3-on nulla, miközben USB-n 1372008 IRQ történt CPU0-1-en.
+- Az IRQ-szálak kért affinitása ténylegesen CPU0-1.
+- A próba alatt 70 MiB adat ment USB RTL8152 Etherneten át; a HAL
+  periódushibája maximum45,677 us, átlag1,693857 us, 131023 ciklusból.
+- Nincs közvetlen arányszám a korábbi 398 us cyclictesthez: más metrika.
+Bizonyítékok: artifacts/hal-irq-load1/ és a kiadásra kiválasztott
+másolat docs/meresek/2026-10-31-hal-irq/ alatt.
+
+A CPU3 helyi időzítője, HRTIMER/IRQ-work és IPI-k megmaradnak.
+NO_HZ_FULL/RCU offload nincs engedélyezve, és a futó GUI is saját
+izolált CPU2-t használ. Teljes megszakításmentességet nem állítunk.
+A softirq-pillanatképekben a NET_RX/NET_TX/TASKLET csak CPU0-1-en jelent
+meg; minden lehetséges kernelháttértevékenység kizárására nincs bizonyíték.
+Vezérelt érintéses terhelés, tartós SD-stressz és hosszabb ismételt HAL
+mérés a konkrét alkalmazás követelményei alapján további vizsgálat.
+
+A közös, új RT+HAL SD-kép fizikai próbája is sikeres. Közvetlenül az Image
+nevű patchelt RT kernelt indítja, a végleges izolációs paraméterekkel.
+Az új képen131019 ciklusból37,708 us maximum és1,895796 us átlagos HAL-
+periódushiba adódott70 MiB hálózati forgalom mellett. Valamennyi ARMCTRL
+eszköz-IRQ CPU2-3 növekménye nulla; az USB CPU0-1 növekménye1371688.
+A teljes eredmény: docs/meresek/2026-10-31-sd-image/.
+
+A korábbi működő fejlesztői kártya teljes mentése helyben megmarad;
+a régi64 GB-os Raspbian SD-t nem módosítottuk. A recovered/ és backups/
+helyi fejlesztői könyvtárak nem részei a GitHub-forrásnak. A használt patch
+és az új fizikai bizonyítékok a board/ illetve docs/ alatt megtalálhatók.
