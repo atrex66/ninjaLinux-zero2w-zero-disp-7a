@@ -19,6 +19,8 @@ még nincs ellenőrizve.
 
 Termékfotók: [Waveshare](https://www.waveshare.net/). A képek a beszállító oldaláról töltődnek be.
 
+[Zero-DISP-7A beszerzés: EU-országonkénti útmutató](docs/display-sourcing-eu.md)
+
 ## Rendszer
 
 | Összetevő | Beállítás |

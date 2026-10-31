@@ -19,6 +19,8 @@ have not been validated.
 
 Product photos: [Waveshare](https://www.waveshare.net/). Images are linked from the supplier’s site.
 
+[Where to buy the Zero-DISP-7A: EU country guide](docs/display-sourcing-eu.md)
+
 ## System
 
 | Item | Configuration |
