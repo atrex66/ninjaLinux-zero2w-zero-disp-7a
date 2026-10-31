@@ -1,5 +1,11 @@
 ninjaLinux-zero2w-zero-disp-7a - changes / változások
 
+2026-10-31 - Hungarian display supplier / Magyar kijelzőforrás
+  EN: Add RPiBolt (RPI-WS24693) as the domestic Hungarian Zero-DISP-7A
+      source, verified against its product page and manufacturer wiki link.
+  HU: RPiBolt (RPI-WS24693) hozzáadva magyarországi Zero-DISP-7A-forrásként;
+      a termékoldal és a gyártói wiki hivatkozása alapján ellenőrizve.
+
 2026-10-31 - EU display sourcing / EU-s kijelzőbeszerzés
   EN: Add a dated bilingual Zero-DISP-7A sourcing guide for all 27 EU
       delivery destinations, direct product/shipping links, observed stock

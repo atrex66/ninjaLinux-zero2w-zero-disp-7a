@@ -42,6 +42,7 @@ volt. Gyorsan elavuló árakat nem rögzítettem; a linkek nem partnerlinkek.
 
 | Seller / Kereskedő | Site or dispatch region / Oldal vagy feladás | Observed page status / Látott állapot |
 |---|---|---|
+| [RPiBolt][rpibolt] | Hungary / Magyarország | In stock / Raktáron; RPI-WS24693. |
 | [Kiwi Electronics][kiwi] | Netherlands / Hollandia | In stock, 1 shown / Raktáron, 1 db jelzéssel. |
 | [Kamami][kamami] | Poland / Lengyelország | Available, 5 shown / Elérhető, 5 db jelzéssel. |
 | [BerryBase DE][berry-de] | German storefront / Német oldal | Available, 6 shown / Elérhető, 6 db jelzéssel. |
@@ -80,7 +81,7 @@ ellenőrzött forrást; nem azt, hogy nincs más kereskedő.
 | FR | France / Franciaország | [Opencircuit][oc] | — |
 | DE | Germany / Németország | [BerryBase DE][berry-de] | [Opencircuit][oc] |
 | GR | Greece / Görögország | [Opencircuit][oc] | — |
-| HU | Hungary / Magyarország | [Opencircuit][oc] | — |
+| HU | Hungary / Magyarország | [RPiBolt][rpibolt] | [Opencircuit][oc] |
 | IE | Ireland / Írország | [Opencircuit][oc] | — |
 | IT | Italy / Olaszország | [Opencircuit][oc] | — |
 | LV | Latvia / Lettország | [Opencircuit][oc] | — |
@@ -98,10 +99,12 @@ ellenőrzött forrást; nem azt, hogy nincs más kereskedő.
 
 ## Ordering notes / Rendelési megjegyzések
 
-- For Hungary, the verified route in this list is cross-border ordering;
-  no domestic Zero-DISP-7A seller was confirmed in this short search.
-  Magyarországhoz most külföldi EU-s rendelést igazolt a keresés;
-  hazai Zero-DISP-7A-forrást nem sikerült megerősíteni.
+- Hungary has a domestic source: [RPiBolt][rpibolt], SKU **RPI-WS24693**.
+  Its product page links to the Zero-DISP-7A manufacturer wiki and showed
+  in-stock status during this check. Opencircuit remains a cross-border alternative.
+  Magyarországi forrás az [RPiBolt][rpibolt], **RPI-WS24693** cikkszámmal.
+  A termékoldal a Zero-DISP-7A gyártói wikijére mutat, és ellenőrzéskor
+  raktárkészletet jelzett. Az Opencircuit külföldi alternatívaként marad.
 - Check the complete kit and the **Zero-DISP-7A / 24693** identifier.
   Ellenőrizd a teljes készletet és a pontos cikkszámot.
 - Check shipping for the actual address, especially islands and outlying
@@ -121,3 +124,5 @@ ellenőrzött forrást; nem azt, hogy nincs más kereskedő.
 [berry-at]: https://www.berrybase.at/en/waveshare-7-touch-display-kit-1024x600-ips-5-punkt-touch-mini-hdmi-usb-c-5v
 [rlx]: https://rlx.sk/en/5-8-lcd-display/9191-7-touch-display-kit-for-raspberry-pi-zero-with-ips-display-expansion-board-1024600-5-point-capacitive-touch-ws-24693.html
 [waveshare]: https://www.waveshare.com/product/raspberry-pi/boards-kits/raspberry-pi-zero/zero-disp-7a.htm
+
+[rpibolt]: https://www.rpibolt.hu/7inch-IPS-kapacitiv-erintokijelzo-Raspberry-Pi-Zero-HDMI
