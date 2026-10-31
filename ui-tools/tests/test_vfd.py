@@ -86,6 +86,42 @@ class VfdTests(unittest.TestCase):
         self.assertEqual(widget.displayCells()[:7], text_cells('NO DATA'))
         self.assertEqual(widget.accessibleDescription(), 'No data')
 
+    def test_glow_spreads_light_and_extinguishes_at_zero_brightness(self):
+        widget = VfdDisplay(); widget.resize(400, 120); widget.setCharacterCount(4)
+        widget.setText('11'); widget.setGlow(False)
+        flat = widget.grab().toImage()
+        widget.setGlow(True)
+        glowing = widget.grab().toImage()
+        self.assertNotEqual(flat, glowing)
+        background = widget.backgroundColor.rgb()
+        spread = 0
+        for y in range(flat.height()):
+            for x in range(flat.width()):
+                if flat.pixelColor(x, y).rgb() == background:
+                    before, after = flat.pixelColor(x, y), glowing.pixelColor(x, y)
+                    if after.red()+after.green()+after.blue() > before.red()+before.green()+before.blue():
+                        spread += 1
+        self.assertGreater(spread, 50)
+        widget.setGlowStrength(0)
+        self.assertEqual(flat, widget.grab().toImage())
+        widget.setGlowStrength(70); widget.setBrightness(0)
+        dark_glow = widget.grab().toImage()
+        widget.setGlow(False)
+        self.assertEqual(dark_glow, widget.grab().toImage())
+
+    def test_glow_properties_invalidate_cache_and_validate_radius(self):
+        widget = VfdDisplay(); widget.resize(400, 100); widget.grab()
+        self.assertIsNotNone(widget._cache)
+        self.assertTrue(widget.setProperty('glowRadius', 9.0))
+        self.assertEqual(widget.glowRadius, 9.0)
+        self.assertIsNone(widget._cache)
+        widget.grab(); widget.setGlowStrength(50)
+        self.assertIsNone(widget._cache)
+        widget.setGlowRadius(99); self.assertEqual(widget.glowRadius, 24.0)
+        widget.setGlowRadius(-1); self.assertEqual(widget.glowRadius, 0.0)
+        widget.setGlowStrength(999); self.assertEqual(widget.glowStrength, 100)
+        with self.assertRaises(ValueError): widget.setGlowRadius(float('nan'))
+
     def test_designer_loads_all_vfd_properties(self):
         try:
             from PySide6.QtUiTools import QUiLoader

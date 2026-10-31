@@ -47,7 +47,9 @@ public toolkit.
 VFD-specific additions belong in ninjaui/vfd.py and are re-exported through
 ninjaui.widgets to preserve the same Designer header. Keep the independent
 point/comma behavior, finite-value validation, visible numeric overflow and
-paint-cache invalidation covered by tests. Preserve VFD-ORIGIN.md attribution;
+paint-cache invalidation covered by tests. Glow must stay cached, include
+point/comma emission and vanish at zero brightness; test high-DPI rendering
+when changing its compositing or scaling. Preserve VFD-ORIGIN.md attribution;
 do not claim the approximation is the original Hunor character ROM.
 
 ## HAL boundary

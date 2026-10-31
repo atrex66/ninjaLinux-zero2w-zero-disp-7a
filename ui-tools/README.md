@@ -125,7 +125,8 @@ OpenGL, a font asset, the simulator or controller hardware. [Origin notes](VFD-O
 | `decimalSeparator` | `.` or `,` for numeric formatting; default `.` |
 | `rightAligned` | Align the content to the right of the fixed-width bank |
 | `foregroundColor`, `backgroundColor`, `offColor` | Active strokes, glass and inactive strokes |
-| `brightness`, `glow` | 0–100 intensity and optional soft halo |
+| `brightness`, `glow` | 0–100 emission intensity and bloom on/off |
+| `glowRadius`, `glowStrength` | Halo extent in logical pixels (0–24, default 6) and strength (0–100, default 70) |
 | `connected`, `halPin` | Missing-data indication and optional existing-runtime numeric pin |
 | `overflow` | Read-only: content exceeds the available cells |
 
@@ -138,6 +139,16 @@ number. Overlong literal text is clipped, with `overflow=True`. Disconnection sh
 `NO DATA` (dashes on banks shorter than seven cells). The reference's `:` glyph
 is an hourglass, not a conventional colon; this is not an original Hunor PROM dump.
 The class exposes `setText(str)` and `setValue(float)` as Qt slots.
+
+The glow combines a broad colored bloom, a tighter halo and a paler segment
+core. Qt smooth image resampling softens only the active strokes, including
+points and commas. This is cached with the final image and recalculated only
+when the content, appearance, size or display scale changes; no animation timer
+or continuously running blur effect is added. `brightness=0` extinguishes the
+emitted light. `glow=False`, zero radius or zero strength gives the flat style.
+Start with radius 6 and strength 70; increase gently for a softer appearance.
+PC rendering was checked, including high-DPI output; Pi rendering cost has not
+been measured.
 
 Export and Pi launch use the same commands as the other forms. The optional
 HAL reader treats it as a numeric readout. No output control is added.
@@ -209,7 +220,7 @@ python -m unittest discover -s tests
 ```
 
 Validated on 2026-10-31 with Linux/amd64, Python 3.13 and PC PySide6 6.11.2:
-19 tests passed, including actual generated UI/resource execution, Designer
+21 tests passed, including actual generated UI/resource execution, Designer
 registration/form loading, input/hold behavior, VFD glyph/point/comma/formatting/cache behavior and fake-HAL stale data.
 The Designer opened the supplied form in the offscreen backend. The panel was
 also exported/run with the host's PySide6 6.8.2.1. Screenshots of both panel pages and the VFD showcase

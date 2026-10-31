@@ -49,6 +49,7 @@ class VfdDisplay(QWidget):
         self._separator = '.'
         self._connected, self._right, self._glow = True, False, True
         self._brightness, self._pin = 100, ''
+        self._glow_radius, self._glow_strength = 6.0, 70
         self._foreground = QColor('#8effdf')
         self._background = QColor('#071415')
         self._off_color = QColor('#132e2a')
@@ -120,6 +121,17 @@ class VfdDisplay(QWidget):
     def setGlow(self, value):
         self._set('_glow', bool(value))
 
+    @Slot(float)
+    def setGlowRadius(self, value):
+        value = float(value)
+        if not math.isfinite(value):
+            raise ValueError('Glow radius must be finite')
+        self._set('_glow_radius', max(0.0, min(24.0, value)))
+
+    @Slot(int)
+    def setGlowStrength(self, value):
+        self._set('_glow_strength', max(0, min(100, int(value))))
+
     @Slot(int)
     def setBrightness(self, value):
         self._set('_brightness', max(0, min(100, int(value))))
@@ -154,6 +166,8 @@ class VfdDisplay(QWidget):
     connected = Property(bool, lambda s: s._connected, setConnected)
     rightAligned = Property(bool, lambda s: s._right, setRightAligned)
     glow = Property(bool, lambda s: s._glow, setGlow)
+    glowRadius = Property(float, lambda s: s._glow_radius, setGlowRadius)
+    glowStrength = Property(int, lambda s: s._glow_strength, setGlowStrength)
     brightness = Property(int, lambda s: s._brightness, setBrightness)
     halPin = Property(str, lambda s: s._pin, setHalPin)
     foregroundColor = Property(QColor, lambda s: QColor(s._foreground), setForegroundColor)
@@ -171,38 +185,69 @@ class VfdDisplay(QWidget):
         padding = [(' ', False)]*(self._count-len(cells))
         return padding+cells if self._right else cells+padding
 
-    def _render(self, pixmap):
-        painter = QPainter(pixmap)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        painter.fillRect(self.rect(), self._background)
-        painter.setPen(QColor('#3d4a3d'))
-        painter.drawRect(self.rect().adjusted(1, 1, -2, -2))
+    def _draw_strokes(self, painter, color, width, active_only):
         cell_width = max(1, self.width()-16)/self._count
         scale = min(cell_width/24, max(1, self.height()-16)/32)
-        lit = QColor(self._foreground if self._connected else '#81958f')
-        lit.setAlphaF(self._brightness/100)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         for index, (char, dot) in enumerate(self.displayCells()):
             painter.save()
             painter.translate(8+index*cell_width+(cell_width-24*scale)/2, (self.height()-32*scale)/2)
             painter.scale(scale, scale)
-            # A soft two-stroke halo avoids a per-frame blur/graphics effect.
-            passes = [(self._off_color, 1.8, False)]
-            if self._glow:
-                halo = QColor(lit)
-                halo.setAlphaF(lit.alphaF()*.15)
-                passes.append((halo, 4.0, True))
-            passes.append((lit, 1.8, True))
-            for color, width, active_only in passes:
-                pen = QPen(color, width, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap)
-                painter.setPen(pen)
-                for name, (x1, y1, x2, y2) in SEGMENTS.items():
-                    if not active_only or name in GLYPHS[char]:
-                        painter.drawLine(x1, y1, x2, y2)
-                if not active_only or dot:
-                    painter.drawEllipse(21, 28, 2, 2)
-                    if dot == ',':
-                        painter.drawLine(22, 30, 21, 32)
+            painter.setPen(QPen(color, width, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
+            for name, (x1, y1, x2, y2) in SEGMENTS.items():
+                if not active_only or name in GLYPHS[char]:
+                    painter.drawLine(x1, y1, x2, y2)
+            if not active_only or dot:
+                painter.drawEllipse(21, 28, 2, 2)
+                if dot == ',':
+                    painter.drawLine(22, 30, 21, 32)
             painter.restore()
+
+    @staticmethod
+    def _soften(image, radius):
+        # Two smooth resamples approximate a soft bloom in native Qt code.
+        # No Python pixel loops, graphics scene or continuously running effect.
+        divisor = max(1.0, radius*image.devicePixelRatioF())
+        small = image.scaled(max(1, round(image.width()/divisor)),
+                             max(1, round(image.height()/divisor)),
+                             Qt.AspectRatioMode.IgnoreAspectRatio,
+                             Qt.TransformationMode.SmoothTransformation)
+        return small.scaled(image.size(), Qt.AspectRatioMode.IgnoreAspectRatio,
+                            Qt.TransformationMode.SmoothTransformation)
+
+    def _render(self, pixmap):
+        painter = QPainter(pixmap)
+        painter.fillRect(self.rect(), self._background)
+        painter.setPen(QColor('#3d4a3d'))
+        painter.drawRect(self.rect().adjusted(1, 1, -2, -2))
+        self._draw_strokes(painter, self._off_color, 1.8, False)
+        lit = QColor(self._foreground if self._connected else '#81958f')
+        lit.setAlphaF(self._brightness/100)
+        bloom = self._glow and self._glow_radius > 0 and self._glow_strength > 0
+        if bloom:
+            emitter = QPixmap(pixmap.size())
+            emitter.setDevicePixelRatio(pixmap.devicePixelRatioF())
+            emitter.fill(Qt.GlobalColor.transparent)
+            light = QPainter(emitter)
+            self._draw_strokes(light, lit, 1.8, True)
+            light.end()
+            strength = self._glow_strength/100
+            painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_Plus)
+            for radius, opacity in ((self._glow_radius*2, .65), (self._glow_radius/2, 1.0)):
+                painter.setOpacity(strength*opacity)
+                painter.drawPixmap(0, 0, self._soften(emitter, radius))
+            painter.setOpacity(1.0)
+            painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceOver)
+        self._draw_strokes(painter, lit, 1.8, True)
+        if bloom:
+            # A narrow, paler phosphor core gives the strokes depth without
+            # brightening unlit segments. Brightness=0 also extinguishes this.
+            core = QColor(lit)
+            core.setRedF(core.redF()*.48+.52)
+            core.setGreenF(core.greenF()*.48+.52)
+            core.setBlueF(core.blueF()*.48+.52)
+            core.setAlphaF(lit.alphaF()*.65*self._glow_strength/100)
+            self._draw_strokes(painter, core, .65, True)
         painter.end()
 
     def paintEvent(self, event):

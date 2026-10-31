@@ -132,7 +132,8 @@ OpenGL, külön betűkészlet, szimulátor vagy vezérlőhardver.
 | `decimalSeparator` | `.` vagy `,` a számformázáshoz; alapból `.` |
 | `rightAligned` | Jobbra igazítás a rögzített szélességű karakterbankban |
 | `foregroundColor`, `backgroundColor`, `offColor` | Aktív szegmensek, kijelzőüveg és inaktív szegmensek színe |
-| `brightness`, `glow` | 0–100 fényerő és választható fényudvar |
+| `brightness`, `glow` | 0–100 kibocsátott fényerő és a derengés kapcsolója |
+| `glowRadius`, `glowStrength` | A fényudvar mérete logikai pixelben (0–24, alapból 6), erőssége (0–100, alapból 70) |
 | `connected`, `halPin` | Adathiányjelzés és választható numerikus pinolvasás |
 | `overflow` | Csak olvasható: az adat túlnyúlik a rendelkezésre álló karakterhelyeken |
 
@@ -146,6 +147,16 @@ A hosszú szöveg levágódik, `overflow=True` mellett. Adathiánykor `NO DATA`,
 hétnél rövidebb banknál vonalak jelennek meg. A referencia `:` karaktere
 homokóra, nem szokásos kettőspont; ez nem az eredeti Hunor karakter-PROM másolata.
 A `setText(str)` és `setValue(float)` Qt-slotként is elérhető.
+
+A derengést egy széles színes fényudvar, egy szűkebb fényréteg és világosabb
+szegmensmag adja. A Qt simított képméretezése csak a világító vonalakat,
+pontokat és vesszőket lágyítja. Az eredmény a kész képpel együtt gyorsítótárba
+kerül; csak adat-, megjelenés-, méret- vagy képernyőskála-változáskor számolódik
+újra. Nem került bele animációs időzítő vagy folyamatos elmosási effektus.
+A `brightness=0` az összes kibocsátott fényt kioltja. `glow=False`, nulla sugár
+vagy nulla erősség esetén a lapos megjelenés látszik. Kiindulásnak 6-os sugár
+és 70-es erősség ajánlott. A PC-s és nagy DPI-s rajzolást ellenőriztük;
+a Pi-n jelentkező rajzolási költséget még nem mértük.
 
 Az export és a Pi-s indítás megegyezik a többi forméval. A választható HAL-olvasó
 számkijelzőként kezeli; kimenetvezérlés ezzel sem kerül bele.
@@ -218,7 +229,7 @@ python -m unittest discover -s tests
 ```
 
 Ellenőrzés 2026-10-31-én, Linux/amd64, Python 3.13, PC-s PySide6 6.11.2:
-19 sikeres teszt, tényleges generált UI-/erőforrás-futtatással,
+21 sikeres teszt, tényleges generált UI-/erőforrás-futtatással,
 Designer-regisztrációval és formbetöltéssel, beviteli/tartási próbával, VFD-karakter/pont/vessző/formázás/gyorsítótár
 ellenőrzésével és ál-HAL-adatok hibakezelésével. A Designer offscreen módban megnyitotta a formot.
 A panel a gép PySide6 6.8.2.1 környezetével is exportálható és futott.

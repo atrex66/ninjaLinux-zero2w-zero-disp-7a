@@ -1,5 +1,16 @@
 ninjaLinux-zero2w-zero-disp-7a - changes / változások
 
+2026-10-31 - VFD phosphor glow / VFD fényudvar
+  EN: Replace the wide-outline halo with two smoothly resampled, additive
+      bloom layers and a paler phosphor core. Expose glowRadius/glowStrength
+      in Designer; cache the finished frame and respect zero brightness.
+  HU: Vastag körvonal helyett két simított, összeadó fényréteg és világosabb
+      foszformag adja a derengést. Designerben glowRadius/glowStrength;
+      gyorsítótárazott kész kép, nulla fényerőn nincs kibocsátott fény.
+  Check: 21 PC tests; emitted light spreads outside flat strokes, zero
+         brightness/strength, cache invalidation and high-DPI rendering.
+         Screenshot refreshed. No Pi deployment or timing claim.
+
 2026-10-31 - Designer VFD element / Designer VFD-kijelző
   EN: Add VfdDisplay based on the Hunor simulator's 14-segment appearance,
       with source attribution, 1-64 cells, independent point/comma, selectable
