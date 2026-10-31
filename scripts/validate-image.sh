@@ -59,6 +59,16 @@ else
  ! test -e "$TARGET/etc/init.d/S12boot-logo"
  ! test -e "$TARGET/usr/libexec/ninjalinux-boot-logo"
 fi
+if grep -q '^BR2_PACKAGE_NINJALINUX_FILE_EXPLORER=y$' "$OUT/.config"; then
+ test -x "$TARGET/etc/init.d/S38file-explorer"
+ test -x "$TARGET/usr/libexec/ninjalinux-file-explorer"
+ test -e "$TARGET/usr/sbin/inetd"
+ test -f "$TARGET/usr/share/ninjalinux-file-explorer/index.html"
+else
+ ! test -e "$TARGET/etc/init.d/S38file-explorer"
+ ! test -e "$TARGET/usr/libexec/ninjalinux-file-explorer"
+ ! test -e "$TARGET/usr/share/ninjalinux-file-explorer"
+fi
 cmp "$OUT/images/Image" "$OUT/build/linux-custom/arch/arm64/boot/Image"
 "$OUT/host/bin/mdir" -i "$OUT/images/boot.vfat" :: > "$OUT/images/boot-list.txt"
 ! grep -Ei 'Image-rt|config-normal|config-rt' "$OUT/images/boot-list.txt"

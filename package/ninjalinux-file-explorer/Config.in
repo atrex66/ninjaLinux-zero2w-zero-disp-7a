@@ -1,0 +1,7 @@
+config BR2_PACKAGE_NINJALINUX_FILE_EXPLORER
+	bool "ninjaLinux on-demand web file explorer"
+	depends on BR2_PACKAGE_PYTHON3 && BR2_PACKAGE_BUSYBOX
+	help
+	  Local-network browser file management for /data. BusyBox inetd starts
+	  Python only on incoming connections; it exits after an idle timeout.
+	  Requires per-device configuration and an access token to enable.

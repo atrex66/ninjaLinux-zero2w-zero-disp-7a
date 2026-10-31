@@ -3,6 +3,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PROFILE="${1:-rt}"
 USB_APP="${NINJALINUX_USB_AUTOSTART:-0}"
+EXPLORER="${NINJALINUX_FILE_EXPLORER:-0}"
+case "$EXPLORER" in 0|1) ;; *) echo 'NINJALINUX_FILE_EXPLORER must be 0 or 1' >&2; exit 2;; esac
 case "$USB_APP" in 0|1) ;; *) echo 'NINJALINUX_USB_AUTOSTART must be 0 or 1' >&2; exit 2;; esac
 case "$PROFILE" in rt|rt-wifi|rt-wifi-ap) ;; *) echo 'Usage: build.sh [rt|rt-wifi|rt-wifi-ap] — PREEMPT_RT only' >&2; exit 2;; esac
 export PATH="$ROOT/vendor/hostdeps/root/usr/bin:$PATH"
@@ -25,12 +27,16 @@ if [ -n "${NINJALINUX_BOOT_LOGO:-}" ]; then
   echo 'Warning: continuing without a boot logo.' >&2
  fi
 fi
+if [ "$EXPLORER" = 1 ]; then DEFAULT_OUT="$DEFAULT_OUT-explorer"; DEFAULT_IMAGES="$DEFAULT_IMAGES-explorer"; fi
 OUT="${FASTLINUX_OUT:-$DEFAULT_OUT}"
 # Buildroot cannot uninstall packages from a reused output tree.
 if [ -f "$OUT/.config" ]; then
  old_usb=0
  grep -q '^BR2_PACKAGE_NINJALINUX_USB_AUTOSTART=y$' "$OUT/.config" && old_usb=1
  [ "$old_usb" = "$USB_APP" ] || { echo 'Use a separate FASTLINUX_OUT for USB addon changes' >&2; exit 2; }
+ old_explorer=0
+ grep -q '^BR2_PACKAGE_NINJALINUX_FILE_EXPLORER=y$' "$OUT/.config" && old_explorer=1
+ [ "$old_explorer" = "$EXPLORER" ] || { echo 'Use a separate FASTLINUX_OUT for explorer addon changes' >&2; exit 2; }
  old_logo=0
  grep -q '^BR2_PACKAGE_PSPLASH=y$' "$OUT/.config" && old_logo=1
  [ "$old_logo" = "$LOGO_ENABLED" ] || { echo 'Use a separate FASTLINUX_OUT for boot logo addon changes' >&2; exit 2; }
@@ -55,6 +61,12 @@ if [ "$USB_APP" = 1 ]; then
  "$BR/utils/config" --file "$OUT/.config" --enable BR2_PACKAGE_NINJALINUX_USB_AUTOSTART
  fragments="$(sed -n 's/^BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES="\(.*\)"/\1/p' "$OUT/.config")"
  "$BR/utils/config" --file "$OUT/.config" --set-str BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES "$fragments $ROOT/board/fastlinux/usb-autostart.fragment"
+ make "${ARGS[@]}" olddefconfig
+fi
+if [ "$EXPLORER" = 1 ]; then
+ "$BR/utils/config" --file "$OUT/.config" --enable BR2_PACKAGE_NINJALINUX_FILE_EXPLORER
+ fragments="$(sed -n 's/^BR2_PACKAGE_BUSYBOX_CONFIG_FRAGMENT_FILES="\(.*\)"/\1/p' "$OUT/.config")"
+ "$BR/utils/config" --file "$OUT/.config" --set-str BR2_PACKAGE_BUSYBOX_CONFIG_FRAGMENT_FILES "$fragments $ROOT/board/fastlinux/file-explorer-busybox.fragment"
  make "${ARGS[@]}" olddefconfig
 fi
 LOGO_CHANGED=0
@@ -84,6 +96,7 @@ python3 "$ROOT/scripts/validate-config.py" "$KDIR/.config" "$PROFILE" "$USB_APP"
 VARIANT="$PROFILE"
 if [ "$USB_APP" = 1 ]; then VARIANT="$VARIANT-usb"; fi
 if [ "$LOGO_ENABLED" = 1 ]; then VARIANT="$VARIANT-logo"; fi
+if [ "$EXPLORER" = 1 ]; then VARIANT="$VARIANT-explorer"; fi
 cp "$KDIR/.config" "$ROOT/artifacts/kernel-${VARIANT}.config"
 cp "$KDIR/arch/arm64/boot/Image" "$ROOT/artifacts/Image-${VARIANT}"
 grep -q 'housekeeping_test_cpu(next_route, HK_TYPE_DOMAIN)' "$DRIVER"

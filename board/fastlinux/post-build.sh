@@ -55,3 +55,9 @@ fi
 if ! grep -q '^BR2_PACKAGE_PSPLASH=y$' "$BR2_CONFIG"; then
  rm -f "$TARGET_DIR/etc/init.d/S12boot-logo" "$TARGET_DIR/usr/libexec/ninjalinux-boot-logo"
 fi
+
+# On-demand browser explorer is absent unless explicitly built.
+if ! grep -q '^BR2_PACKAGE_NINJALINUX_FILE_EXPLORER=y$' "$BR2_CONFIG"; then
+ rm -f "$TARGET_DIR/etc/init.d/S38file-explorer" "$TARGET_DIR/usr/libexec/ninjalinux-file-explorer"
+ rm -rf "$TARGET_DIR/usr/share/ninjalinux-file-explorer"
+fi

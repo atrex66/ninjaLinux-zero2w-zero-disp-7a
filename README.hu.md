@@ -21,6 +21,13 @@ Termékfotók: [Waveshare](https://www.waveshare.net/). A képek a beszállító
 
 [Zero-DISP-7A beszerzés: EU-országonkénti útmutató](docs/display-sourcing-eu.md)
 
+## Igény szerint induló böngészős fájlkezelő (opcionális)
+
+A `/data` kezelése PC-s/telefonos böngészőből: feltöltés, letöltés, átnevezés,
+mappák, megerősítéses törlés és UTF-8 szövegszerkesztés. Az inetd csak kapcsolatkor
+indítja a Python-kezelőt, amely tétlenségkor kilép. Nem kell kliensalkalmazás
+vagy SSH-kulcs. [Beállítás és használat](docs/file-explorer.hu.md).
+
 ## Saját bootlogó (opcionális)
 
 PNG/SVG kép korai framebuffer-bootlogóként, fordítógépen előkészítve.

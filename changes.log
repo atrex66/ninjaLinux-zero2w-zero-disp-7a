@@ -1,5 +1,19 @@
 ninjaLinux-zero2w-zero-disp-7a - changes / változások
 
+2026-10-31 - On-demand browser file explorer / Igény szerinti böngészős fájlkezelő
+  EN: Add opt-in NINJALINUX_FILE_EXPLORER with a local /data file manager,
+      per-device access code, upload/download, folders, non-overwriting rename,
+      confirmed deletion and UTF-8 editing. BusyBox inetd wait-mode activates
+      Python on connections; the worker exits when idle. No continuous polling.
+  HU: Opcionális helyi /data fájlkezelő saját belépési kóddal, feltöltéssel,
+      letöltéssel, mappakezeléssel, átnevezéssel, megerősítéses törléssel és
+      UTF-8 szerkesztővel. Az inetd kapcsolatra indít, tétlenségkor kilép a
+      Python-kezelő. HU/EN asztali/mobil felület; nincs folyamatos lekérdezés.
+  Check: 48 offline tests, including real HTTP/filesystem operations, idle
+         exit/reactivation, config
+         failure handling; Chromium desktop/mobile workflows and Kconfig.
+         No target deployment, full image build or RT load measurement yet.
+
 2026-10-31 - Writable USB cartridges / Írható USB-cartridge
   EN: Add optional writable:true to autostart.json. Scan read-only, reopen
       only the selected cartridge writable, and keep HOME/XDG settings in

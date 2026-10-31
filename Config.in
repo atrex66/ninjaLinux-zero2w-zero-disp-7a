@@ -4,3 +4,5 @@ source "$BR2_EXTERNAL_FASTLINUX_PATH/package/python-pyside6/Config.in"
 source "$BR2_EXTERNAL_FASTLINUX_PATH/package/automation-hal/Config.in"
 
 source "$BR2_EXTERNAL_FASTLINUX_PATH/package/ninjalinux-usb-autostart/Config.in"
+
+source "$BR2_EXTERNAL_FASTLINUX_PATH/package/ninjalinux-file-explorer/Config.in"

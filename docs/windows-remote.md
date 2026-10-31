@@ -4,6 +4,9 @@
 
 The Pi is `192.168.0.234/24`; StepperNinja is `192.168.0.235`. Your computer must have a route to the Pi, normally on the same LAN. These instructions were checked against the official documentation; a Windows computer was not used for live acceptance testing.
 
+For browser access without an SSH key, enable the optional
+[on-demand file explorer](file-explorer.md) for `/data`.
+
 ## Terminal: PowerShell and OpenSSH
 
 Open PowerShell and run:

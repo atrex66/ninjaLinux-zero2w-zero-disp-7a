@@ -21,6 +21,13 @@ Product photos: [Waveshare](https://www.waveshare.net/). Images are linked from 
 
 [Where to buy the Zero-DISP-7A: EU country guide](docs/display-sourcing-eu.md)
 
+## On-demand browser file explorer (optional)
+
+Manage `/data` from a desktop/phone browser: upload/download, rename, folders,
+confirmed deletion and UTF-8 text editing. BusyBox inetd activates Python on
+incoming connections; the worker exits after an idle timeout. No client app
+or SSH key required. [Setup and use](docs/file-explorer.md).
+
 ## Custom boot logo (optional)
 
 Use a PNG or SVG as an early framebuffer logo, converted on the build host.

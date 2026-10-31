@@ -4,6 +4,9 @@
 
 A Pi címe `192.168.0.234/24`, a StepperNinjáé `192.168.0.235`. A PC-ről elérhető hálózati út kell a Pi-hez, jellemzően ugyanazon a helyi hálózaton. A leírást a hivatalos dokumentáció alapján ellenőriztük; Windows gépen élő átvételi próba még nem történt.
 
+Böngészőből, SSH-kulcs nélkül is kezelhető a `/data`, ha az opcionális
+[igény szerint induló fájlkezelő](file-explorer.hu.md) engedélyezve van.
+
 ## Terminál: PowerShell és OpenSSH
 
 PowerShellben:

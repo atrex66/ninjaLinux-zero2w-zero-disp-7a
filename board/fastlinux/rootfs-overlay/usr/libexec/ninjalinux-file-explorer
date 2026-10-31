@@ -1,0 +1,371 @@
+#!/usr/bin/python3
+"""On-demand, local-network /data file manager; activated by inetd's wait socket."""
+import argparse
+import ctypes
+import errno
+import hmac
+from http.server import BaseHTTPRequestHandler
+import json
+import os
+from pathlib import Path
+import secrets
+import signal
+import socket
+import stat
+import sys
+from types import SimpleNamespace
+from urllib.parse import parse_qs, quote, urlsplit
+
+CONFIG = Path('/data/file-explorer.json')
+STATE = Path('/run/ninjalinux-file-explorer')
+ASSETS = Path('/usr/share/ninjalinux-file-explorer')
+MAX_UPLOAD = 64 * 1024 * 1024
+
+
+def settings(path):
+    if Path(path).stat().st_size > 16384:
+        raise ValueError('Explorer settings exceed 16 KiB')
+    with Path(path).open(encoding='utf-8') as source:
+        data = json.load(source)
+    if not isinstance(data, dict) or set(data) - {'enabled', 'token', 'port', 'idle_timeout'}:
+        raise ValueError('Unknown explorer settings')
+    if data.get('enabled') is not True:
+        raise ValueError('Explorer disabled')
+    token = data.get('token')
+    if not isinstance(token, str) or not 24 <= len(token) <= 128 or not token.isascii() or any(
+            c.isspace() or ord(c) < 33 or ord(c) > 126 for c in token):
+        raise ValueError('Use an ASCII access token of 24 to 128 characters without whitespace')
+    port = data.get('port', 8080)
+    idle = data.get('idle_timeout', 30)
+    if type(port) is not int or not 1024 <= port <= 65535:
+        raise ValueError('port must be 1024..65535')
+    if type(idle) is not int or not 5 <= idle <= 300:
+        raise ValueError('idle_timeout must be 5..300 seconds')
+    return dict(token=token, port=port, idle_timeout=idle)
+
+
+def parts(path):
+    if not isinstance(path, str) or path.startswith('/') or len(path) > 4096:
+        raise ValueError('Invalid path')
+    result = path.split('/') if path else []
+    if any(p in ('', '.', '..') or any(ord(c) < 32 for c in p) for p in result):
+        raise ValueError('Invalid path component')
+    return result
+
+
+class Files:
+    """Directory-fd operations: no symlink traversal, including during races."""
+    def __init__(self, root):
+        self.fd = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+
+    def directory(self, path):
+        fd = os.dup(self.fd)
+        try:
+            for name in parts(path):
+                child = os.open(name, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=fd)
+                os.close(fd)
+                fd = child
+            return fd
+        except BaseException:
+            os.close(fd)
+            raise
+
+    def parent(self, path):
+        names = parts(path)
+        if not names:
+            raise ValueError('The /data root cannot be changed')
+        return self.directory('/'.join(names[:-1])), names[-1]
+
+    def listing(self, path):
+        fd = self.directory(path)
+        try:
+            entries = []
+            for name in os.listdir(fd):
+                info = os.stat(name, dir_fd=fd, follow_symlinks=False)
+                kind = 'dir' if stat.S_ISDIR(info.st_mode) else 'file' if stat.S_ISREG(info.st_mode) else 'other'
+                entries.append(dict(name=name, kind=kind, size=info.st_size, modified=int(info.st_mtime)))
+                if len(entries) > 5000:
+                    raise ValueError('Directory contains more than 5000 entries')
+            return sorted(entries, key=lambda e: (e['kind'] != 'dir', e['name'].casefold()))
+        finally:
+            os.close(fd)
+
+    def open_file(self, path):
+        fd, name = self.parent(path)
+        try:
+            # O_NONBLOCK avoids blocking on a FIFO before fstat rejects it.
+            result = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=fd)
+            if not stat.S_ISREG(os.fstat(result).st_mode):
+                os.close(result)
+                raise ValueError('Only regular files can be downloaded')
+            return result
+        finally:
+            os.close(fd)
+
+    def mkdir(self, path):
+        fd, name = self.parent(path)
+        try:
+            os.mkdir(name, mode=0o755, dir_fd=fd)
+        finally:
+            os.close(fd)
+
+    def delete(self, path):
+        fd, name = self.parent(path)
+        try:
+            info = os.stat(name, dir_fd=fd, follow_symlinks=False)
+            if stat.S_ISDIR(info.st_mode):
+                os.rmdir(name, dir_fd=fd)  # Deliberately empty directories only.
+            elif stat.S_ISREG(info.st_mode):
+                os.unlink(name, dir_fd=fd)
+            else:
+                raise ValueError('Links and special files cannot be modified')
+        finally:
+            os.close(fd)
+
+    def rename(self, path, new_name):
+        if len(parts(new_name)) != 1:
+            raise ValueError('Enter a single new filename')
+        fd, name = self.parent(path)
+        try:
+            info = os.stat(name, dir_fd=fd, follow_symlinks=False)
+            if not (stat.S_ISDIR(info.st_mode) or stat.S_ISREG(info.st_mode)):
+                raise ValueError('Links and special files cannot be modified')
+            # Linux/glibc atomic RENAME_NOREPLACE: never silently overwrite.
+            libc = ctypes.CDLL(None, use_errno=True)
+            rename = libc.renameat2
+            rename.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_uint]
+            rename.restype = ctypes.c_int
+            if rename(fd, os.fsencode(name), fd, os.fsencode(new_name), 1):
+                code = ctypes.get_errno()
+                raise OSError(code, os.strerror(code))
+        finally:
+            os.close(fd)
+
+    def upload(self, path, source, length, replace=False):
+        fd, name = self.parent(path)
+        temp = '.ninja-upload-' + secrets.token_hex(12)
+        try:
+            mode = 0o644
+            try:
+                info = os.stat(name, dir_fd=fd, follow_symlinks=False)
+            except FileNotFoundError:
+                info = None
+            if info:
+                if not stat.S_ISREG(info.st_mode):
+                    raise ValueError('Destination is not a regular file')
+                if not replace:
+                    raise FileExistsError(errno.EEXIST, 'Destination already exists')
+                mode = stat.S_IMODE(info.st_mode) & 0o777
+            free = os.fstatvfs(fd)
+            if free.f_bavail * free.f_frsize < length + 1024 * 1024:
+                raise OSError(errno.ENOSPC, 'Insufficient space')
+            out = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, mode, dir_fd=fd)
+            with os.fdopen(out, 'wb') as target:
+                if info:
+                    os.fchown(target.fileno(), info.st_uid, info.st_gid)
+                remaining = length
+                while remaining:
+                    block = source.read(min(65536, remaining))
+                    if not block:
+                        raise ValueError('Upload interrupted')
+                    target.write(block)
+                    remaining -= len(block)
+                target.flush()
+                os.fsync(target.fileno())
+            if replace:
+                os.replace(temp, name, src_dir_fd=fd, dst_dir_fd=fd)
+            else:
+                os.link(temp, name, src_dir_fd=fd, dst_dir_fd=fd, follow_symlinks=False)
+        finally:
+            try:
+                os.unlink(temp, dir_fd=fd)
+            except FileNotFoundError:
+                pass
+            os.close(fd)
+
+
+class Handler(BaseHTTPRequestHandler):
+    protocol_version = 'HTTP/1.1'
+    server_version = 'ninjaExplorer'
+
+    def log_message(self, format, *args):
+        # Avoid logging filenames, tokens or user-controlled request text.
+        pass
+
+    def send_response(self, code, message=None):
+        self.response_started = True
+        super().send_response(code, message)
+
+    def reply(self, code, body, kind='application/json; charset=utf-8', extra=None):
+        self.send_response(code)
+        self.send_header('Content-Type', kind)
+        self.send_header('Content-Length', str(len(body)))
+        self.send_header('Connection', 'close')
+        self.send_header('Cache-Control', 'no-store')
+        self.send_header('X-Content-Type-Options', 'nosniff')
+        self.send_header('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'")
+        self.send_header('Referrer-Policy', 'no-referrer')
+        for key, value in (extra or {}).items():
+            self.send_header(key, value)
+        self.end_headers()
+        self.wfile.write(body)
+        self.close_connection = True
+
+    def json(self, code, data):
+        self.reply(code, json.dumps(data, ensure_ascii=True).encode())
+
+    def length(self, maximum):
+        if self.headers.get('Transfer-Encoding'):
+            raise ValueError('Chunked requests are unsupported')
+        value = self.headers.get('Content-Length', '')
+        if not value.isascii() or not value.isdecimal() or len(value) > 12:
+            raise ValueError('Content-Length required')
+        result = int(value)
+        if result > maximum:
+            raise ValueError('Request is too large')
+        return result
+
+    def route(self):
+        parsed = urlsplit(self.path)
+        if self.command == 'GET' and parsed.path in ('/', '/app.js', '/style.css'):
+            name, kind = {'/': ('index.html', 'text/html; charset=utf-8'),
+                          '/app.js': ('app.js', 'text/javascript; charset=utf-8'),
+                          '/style.css': ('style.css', 'text/css; charset=utf-8')}[parsed.path]
+            self.reply(200, (self.server.assets / name).read_bytes(), kind)
+            return
+        auth = self.headers.get('Authorization', '')
+        if not hmac.compare_digest(auth.encode('utf-8'), ('Bearer ' + self.server.config['token']).encode()):
+            self.json(401, dict(error='Access code required / Belépési kód szükséges'))
+            return
+        query = parse_qs(parsed.query, keep_blank_values=True)
+        path = query.get('path', [''])[0]
+        files = self.server.files
+        if self.command == 'GET' and parsed.path == '/api/list':
+            self.json(200, dict(path=path, entries=files.listing(path)))
+        elif self.command == 'GET' and parsed.path == '/api/file':
+            fd = files.open_file(path)
+            with os.fdopen(fd, 'rb') as source:
+                length = os.fstat(source.fileno()).st_size
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/octet-stream')
+                self.send_header('Content-Length', str(length))
+                self.send_header('Content-Disposition', "attachment; filename*=UTF-8''" + quote(path.split('/')[-1], safe=''))
+                self.send_header('Connection', 'close')
+                self.send_header('Cache-Control', 'no-store')
+                self.send_header('X-Content-Type-Options', 'nosniff')
+                self.end_headers()
+                while length:
+                    data = source.read(min(65536, length))
+                    if not data:
+                        break
+                    self.wfile.write(data)
+                    length -= len(data)
+                self.close_connection = True
+        elif self.command == 'PUT' and parsed.path == '/api/file':
+            files.upload(path, self.rfile, self.length(MAX_UPLOAD), query.get('replace') == ['1'])
+            self.json(200, dict(ok=True))
+        elif self.command == 'POST' and parsed.path in ('/api/mkdir', '/api/rename', '/api/delete'):
+            data = json.loads(self.rfile.read(self.length(16384)).decode('utf-8'))
+            if not isinstance(data, dict):
+                raise ValueError('Expected JSON object')
+            path = data.get('path')
+            if parsed.path == '/api/mkdir':
+                files.mkdir(path)
+            elif parsed.path == '/api/rename':
+                files.rename(path, data.get('name'))
+            else:
+                files.delete(path)
+            self.json(200, dict(ok=True))
+        else:
+            self.json(404, dict(error='Not found'))
+
+    def dispatch(self):
+        try:
+            self.route()
+        except (ValueError, UnicodeError) as error:
+            if getattr(self, 'response_started', False):
+                self.close_connection = True
+                return
+            self.json(400, dict(error=str(error)))
+        except OSError as error:
+            if getattr(self, 'response_started', False):
+                self.close_connection = True
+                return
+            code = 404 if error.errno == errno.ENOENT else 409 if error.errno in (errno.EEXIST, errno.ENOTEMPTY) else 403
+            self.json(code, dict(error='Filesystem operation failed', detail=error.strerror or str(error)))
+
+    do_GET = do_PUT = do_POST = dispatch
+
+
+def serve(listener, config, root=Path('/data'), assets=ASSETS, request_timeout=15, hard_timeout=0):
+    files = Files(root)
+    server = SimpleNamespace(config=config, files=files, assets=assets)
+    listener.settimeout(config['idle_timeout'])
+    try:
+        while True:
+            try:
+                connection, peer = listener.accept()
+            except socket.timeout:
+                return
+            with connection:
+                connection.settimeout(request_timeout)
+                try:
+                    if hard_timeout:
+                        signal.alarm(hard_timeout)
+                    Handler(connection, peer, server)
+                except (OSError, ValueError):
+                    pass  # An interrupted connection never keeps the service alive.
+                finally:
+                    if hard_timeout:
+                        signal.alarm(0)
+    finally:
+        os.close(files.fd)
+
+
+def configure(config):
+    STATE.mkdir(mode=0o700, parents=True, exist_ok=True)
+    text = (f"{config['port']} stream tcp wait root /usr/bin/taskset "
+            "taskset -c 0,1 /usr/libexec/ninjalinux-file-explorer serve\n")
+    (STATE / 'inetd.conf').write_text(text, encoding='ascii')
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('mode', choices=['validate', 'configure', 'serve'])
+    parser.add_argument('--config', type=Path, default=CONFIG)
+    args = parser.parse_args()
+    try:
+        config = settings(args.config)
+        if args.mode == 'configure':
+            configure(config)
+        elif args.mode == 'serve':
+            STATE.mkdir(mode=0o700, parents=True, exist_ok=True)
+            worker = STATE / 'worker.pid'
+            worker.write_text(str(os.getpid()), encoding='ascii')
+            with socket.fromfd(0, socket.AF_INET, socket.SOCK_STREAM) as listener:
+                def expired(signum, frame):
+                    raise TimeoutError('Request deadline exceeded')
+                signal.signal(signal.SIGALRM, expired)
+                def stopped(signum, frame):
+                    raise SystemExit(0)
+                signal.signal(signal.SIGTERM, stopped)
+                try:
+                    serve(listener, config, hard_timeout=60)
+                finally:
+                    worker.unlink(missing_ok=True)
+    except (OSError, ValueError) as error:
+        if args.mode == 'serve':
+            # A wait-mode inetd leaves the connection queued. Consume it even
+            # after config/data failure, or inetd could repeatedly respawn us.
+            try:
+                with socket.fromfd(0, socket.AF_INET, socket.SOCK_STREAM) as listener:
+                    listener.settimeout(1)
+                    connection, peer = listener.accept()
+                    with connection:
+                        connection.settimeout(1)
+                        connection.sendall(b'HTTP/1.1 503 Service Unavailable\r\nContent-Length: 0\r\nConnection: close\r\n\r\n')
+            except OSError:
+                pass
+        else:
+            print('File explorer inactive:', str(error), file=sys.stderr)
+        raise SystemExit(1 if args.mode == 'validate' else 0)

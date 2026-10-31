@@ -1,0 +1,45 @@
+#!/bin/sh
+# Only inetd remains resident; Python is socket-activated and expires when idle.
+state=/run/ninjalinux-file-explorer
+case "$1" in
+ start)
+  if [ -r "$state/inetd.pid" ] && kill -0 "$(cat "$state/inetd.pid")" 2>/dev/null; then exit 0; fi
+  mountpoint -q /data || exit 0
+  mkdir -p "$state"
+  chmod 700 "$state"
+  if [ ! -e /data/file-explorer.json ]; then
+   mkdir -p "$state/boot"
+   if mount -t vfat -o ro /dev/mmcblk0p1 "$state/boot"; then
+    if [ -f "$state/boot/file-explorer.json" ] &&
+       /usr/libexec/ninjalinux-file-explorer validate --config "$state/boot/file-explorer.json" >>/tmp/file-explorer.log 2>&1; then
+     (umask 077; cp "$state/boot/file-explorer.json" /data/file-explorer.json)
+    fi
+    umount "$state/boot"
+   fi
+  fi
+  [ -f /data/file-explorer.json ] || exit 0
+  chmod 600 /data/file-explorer.json
+  rm -f "$state/inetd.conf"
+  /usr/libexec/ninjalinux-file-explorer configure >>/tmp/file-explorer.log 2>&1
+  [ -s "$state/inetd.conf" ] || exit 0
+  start-stop-daemon -S -q -b -m -p "$state/inetd.pid" \
+   -x /usr/bin/taskset -- -c 0,1 /usr/sbin/inetd -f -e "$state/inetd.conf" \
+   >>/tmp/file-explorer.log 2>&1
+  ;;
+ stop)
+  start-stop-daemon -K -q -p "$state/worker.pid" || true
+  start-stop-daemon -K -q -p "$state/inetd.pid" || true
+  for file in "$state/worker.pid" "$state/inetd.pid"; do
+   [ -r "$file" ] || continue
+   read -r pid < "$file"
+   case "$pid" in ''|*[!0-9]*) continue;; esac
+   n=0
+   while kill -0 "$pid" 2>/dev/null && [ "$n" -lt 50 ]; do
+    sleep 0.02; n=$((n+1))
+   done
+   kill -0 "$pid" 2>/dev/null || rm -f "$file"
+  done
+  ;;
+ restart) "$0" stop; "$0" start;;
+esac
+exit 0
