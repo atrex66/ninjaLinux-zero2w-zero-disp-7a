@@ -216,6 +216,15 @@ projektforrás, csomaglicencek és a rögzített GCC/glibc runtime-források.
 A személyre szabott tesztkép, SD-mentések, helyi naplók és személyes kulcsok
 nem részei a kiadásnak.
 
+## Felületfejlesztés PC-n
+
+A [ui-tools fejlesztői csomag](ui-tools/README.hu.md) Qt Widgets Designer-indítót,
+üres és mintaként használható 1024×600-as formot, saját ninjaLinux widgetcsoportot,
+profilellenőrzést, PC-s előnézetet és Python-telepítőcsomagot ad. Tartalmazza a
+szerkesztő hivatalos linkjét, Windows/Linux telepítést és a
+[saját widgetek fejlesztési útmutatóját](ui-tools/AGENTS.md).
+A fejlesztőeszközök a PC-n maradnak; a csomag hozzáadása nem módosítja az SD-képet.
+
 ## Távoli elérés útmutatói
 
 - [SSHFS: a Pi fájljainak csatolása Linuxról](docs/sshfs.hu.md)

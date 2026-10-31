@@ -212,6 +212,14 @@ a corresponding-source bundle with Buildroot, applied patches, project source,
 package licenses, and pinned GCC/glibc runtime sources. The separately
 personalized test image, SD backups, local logs and personal keys are excluded.
 
+## UI development on a PC
+
+The [ui-tools developer kit](ui-tools/README.md) includes a Qt Widgets Designer
+launcher, blank/sample 1024×600 forms, a ninjaLinux widget group, profile checks,
+PC preview and Python deployment bundles. It also includes the editor's official
+links, Windows/Linux setup and [custom-widget development instructions](ui-tools/AGENTS.md).
+Development tools stay on the PC; adding this kit does not change the SD image.
+
 ## Remote access guides
 
 - [SSHFS: mount remote files from Linux](docs/sshfs.md)

@@ -1,0 +1,9 @@
+{
+  "name": "ninjaLinux Zero 2 W / Zero-DISP-7A",
+  "screen": [1024, 600],
+  "target_pyside": "6.11.2",
+  "modules": ["QtCore", "QtGui", "QtWidgets", "QtNetwork", "QtOpenGL", "QtOpenGLWidgets"],
+  "widgets": ["QWidget", "QMainWindow", "QFrame", "QLabel", "QPushButton", "QToolButton", "QCheckBox", "QRadioButton", "QLineEdit", "QTextEdit", "QPlainTextEdit", "QSpinBox", "QDoubleSpinBox", "QSlider", "QDial", "QProgressBar", "QLCDNumber", "QComboBox", "QListWidget", "QTreeWidget", "QTableWidget", "QListView", "QTreeView", "QTableView", "QGroupBox", "QTabWidget", "QStackedWidget", "QScrollArea", "QSplitter", "QAbstractScrollArea", "QCalendarWidget", "QDateEdit", "QTimeEdit", "QDateTimeEdit", "QDialogButtonBox", "QMenuBar", "QMenu", "QStatusBar", "QToolBar", "QDockWidget", "QOpenGLWidget"],
+  "layouts": ["QVBoxLayout", "QHBoxLayout", "QGridLayout", "QFormLayout", "QStackedLayout"],
+  "custom_widgets": {"StatusLed": "QWidget", "AxisDisplay": "QLabel", "TouchButton": "QPushButton", "NumericPad": "QWidget"}
+}

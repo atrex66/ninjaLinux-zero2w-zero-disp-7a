@@ -1,5 +1,24 @@
 ninjaLinux-zero2w-zero-disp-7a - changes / változások
 
+2026-10-31 - Qt Designer UI tools / Qt Designer fejlesztői csomag
+  EN: Add ui-tools: 1024x600 blank/panel templates, Designer custom-widget
+      registration, target profile checks, PNG resource/UI compilation,
+      PC preview and manual EGLFS bundle launcher. Include LED, numeric
+      readout, one-second hold button and embedded keypad. Optional HAL
+      adapter reads an existing private runtime; no output writes/startup.
+      English/Hungarian instructions link the editor and Windows/Linux setup;
+      AGENTS.md documents creating and validating custom widgets.
+  HU: ui-tools: 1024x600-as üres/panelsablon, saját Designer-elemek,
+      célprofil-ellenőrzés, PNG-erőforrás/UI-fordítás, PC-előnézet és kézi
+      EGLFS-indító. LED, számkijelző, egy másodperces tartású gomb és beépített
+      számbillentyűzet. Választható, meglévő privát HAL-t olvasó adapter;
+      kimenetet nem ír és HAL-t nem indít. Kétnyelvű szerkesztő-/telepítési
+      leírás, AGENTS.md saját widgetek készítéséhez és ellenőrzéséhez.
+  Check: 11 PC tests with PySide6 6.11.2, generated resources independent of
+         sources, Designer registration/form loading, touch/hold and fake-HAL
+         errors. Both 1024x600 pages visually checked. Windows and physical
+         Pi EGLFS/touch/live HAL not tested; no deployment or image rebuild.
+
 2026-10-31 - Hungarian display supplier / Magyar kijelzőforrás
   EN: Add RPiBolt (RPI-WS24693) as the domestic Hungarian Zero-DISP-7A
       source, verified against its product page and manufacturer wiki link.
