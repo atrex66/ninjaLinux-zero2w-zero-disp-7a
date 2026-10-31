@@ -13,6 +13,12 @@ A közös SD-kép fizikai boot-, érintési, SSH-kulcsbeállítási, HAL-funkcio
 változat: másik gépen végzett tiszta fordítás és fizikai mozgásvezérlő I/O
 még nincs ellenőrizve.
 
+| [Raspberry Pi Zero 2 W](https://www.raspberrypi.com/products/raspberry-pi-zero-2-w/) | [Waveshare Zero-DISP-7A](https://www.waveshare.com/zero-disp-7a.htm) |
+|:---:|:---:|
+| <a href="https://www.raspberrypi.com/products/raspberry-pi-zero-2-w/"><img src="https://www.waveshare.net/photo/development-board/Raspberry-Pi-Zero-2-W/Raspberry-Pi-Zero-2-W-details-size.jpg" alt="Raspberry Pi Zero 2 W" width="320"></a> | <a href="https://www.waveshare.com/zero-disp-7a.htm"><img src="https://www.waveshare.net/photo/accBoard/Zero-DISP-7A/Zero-DISP-7A-3.jpg" alt="Waveshare Zero-DISP-7A" width="320"></a> |
+
+Termékfotók: [Waveshare](https://www.waveshare.net/). A képek a beszállító oldaláról töltődnek be.
+
 ## Rendszer
 
 | Összetevő | Beállítás |

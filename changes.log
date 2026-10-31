@@ -1,5 +1,11 @@
 ninjaLinux-zero2w-zero-disp-7a - changes / változások
 
+2026-10-31 - Hardware photos / Hardverképek
+  EN: Show Zero 2 W and Zero-DISP-7A product photos side by side near the
+      top of both READMEs, with product links and Waveshare attribution.
+  HU: Zero 2 W és Zero-DISP-7A termékfotók egymás mellett mindkét README
+      elején, termékoldal-hivatkozásokkal és Waveshare forrásmegjelöléssel.
+
 2026-10-31 - Public source licensing / Nyilvános forrás licencei
   EN: Keep MIT for independently authored ninjaLinux code. Document the
       per-file GPL/Library GPL/LGPL terms of HAL, upstream kernel/patch

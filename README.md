@@ -13,6 +13,12 @@ HAL functional test and a short graphics/Ethernet timing trial. This is a
 release candidate; a clean build on another machine and physical motion I/O
 have not been validated.
 
+| [Raspberry Pi Zero 2 W](https://www.raspberrypi.com/products/raspberry-pi-zero-2-w/) | [Waveshare Zero-DISP-7A](https://www.waveshare.com/zero-disp-7a.htm) |
+|:---:|:---:|
+| <a href="https://www.raspberrypi.com/products/raspberry-pi-zero-2-w/"><img src="https://www.waveshare.net/photo/development-board/Raspberry-Pi-Zero-2-W/Raspberry-Pi-Zero-2-W-details-size.jpg" alt="Raspberry Pi Zero 2 W" width="320"></a> | <a href="https://www.waveshare.com/zero-disp-7a.htm"><img src="https://www.waveshare.net/photo/accBoard/Zero-DISP-7A/Zero-DISP-7A-3.jpg" alt="Waveshare Zero-DISP-7A" width="320"></a> |
+
+Product photos: [Waveshare](https://www.waveshare.net/). Images are linked from the supplier’s site.
+
 ## System
 
 | Item | Configuration |
