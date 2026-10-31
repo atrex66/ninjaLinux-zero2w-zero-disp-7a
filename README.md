@@ -21,6 +21,12 @@ Product photos: [Waveshare](https://www.waveshare.net/). Images are linked from 
 
 [Where to buy the Zero-DISP-7A: EU country guide](docs/display-sourcing-eu.md)
 
+## Custom boot logo (optional)
+
+Use a PNG or SVG as an early framebuffer logo, converted on the build host.
+Logo errors skip the splash and do not block application startup.
+[Example ninja artwork and build instructions](docs/boot-logo.md).
+
 ## USB application cartridge (optional)
 
 Boot a Python/PySide6 or native application directly from a pre-inserted USB

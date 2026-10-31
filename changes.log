@@ -1,5 +1,18 @@
 ninjaLinux-zero2w-zero-disp-7a - changes / változások
 
+2026-10-31 - Optional custom boot logo / Opcionális saját bootlogó
+  EN: Add NINJALINUX_BOOT_LOGO PNG/SVG host conversion and embedded PSplash
+      image, with separate build outputs and logo-change rebuilds. Start
+      before Qt, no forced dwell time; skip bad input and stop before UI.
+      Include the user's ninja-eyes artwork, white filled paths on black.
+  HU: NINJALINUX_BOOT_LOGO PNG/SVG átalakítás a fordítógépen, PSplash-ba
+      épített kép, külön buildváltozat és képváltozáskor újrafordítás.
+      Qt előtti indítás, nincs kötelező várakozás; hibás kép kihagyása.
+      A felhasználó ninja-szemes logója fehér kitöltéssel, fekete háttéren.
+  Check: 32 offline tests; PNG/SVG conversion, missing/bad input, simulated
+         framebuffer/writer failures and shutdown races; Kconfig resolution.
+         Full image build, physical boot/handoff and RT measurements pending.
+
 2026-10-31 - Optional USB application cartridge / Opcionális USB alkalmazás-cartridge
   EN: Add opt-in built-in USB storage support and a boot-only autostart.json
       selector. Run one valid Python/native cartridge using the existing UI

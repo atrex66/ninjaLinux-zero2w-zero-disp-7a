@@ -1,0 +1,9 @@
+#!/bin/sh
+case "$1" in
+ start)
+  [ -x /usr/bin/psplash ] || exit 0
+  /usr/libexec/ninjalinux-boot-logo run >>/tmp/boot-logo.log 2>&1 &
+  ;;
+ stop) /usr/libexec/ninjalinux-boot-logo stop ;;
+esac
+exit 0

@@ -1,0 +1,52 @@
+#!/bin/sh
+# Only the early framebuffer writer. Never take over a VT or start Qt.
+state=${NINJALINUX_SPLASH_STATE:-/run/ninjalinux-boot-logo}
+psplash=${NINJALINUX_PSPLASH:-/usr/bin/psplash}
+fb=${NINJALINUX_SPLASH_FB:-/dev/fb0}
+case "$1" in
+ stop)
+  mkdir -p "$state" || exit 0
+  touch "$state/stop"
+  if [ -r "$state/pid" ]; then
+   read -r pid < "$state/pid"
+   case "$pid" in ''|*[!0-9]*) exit 0;; esac
+   # The owner removes its pid only after its framebuffer child is reaped.
+   kill -TERM "$pid" 2>/dev/null || true
+   n=0
+   while [ -e "$state/pid" ] && [ "$n" -lt 30 ]; do
+    sleep 0.01; n=$((n+1))
+   done
+  fi
+  exit 0
+  ;;
+ run) ;;
+ *) exit 0;;
+esac
+mkdir -p "$state" || exit 0
+# Single boot-only instance; an application restart must not restart the logo.
+mkdir "$state/started" 2>/dev/null || exit 0
+[ ! -e "$state/stop" ] || exit 0
+child=
+cleanup() {
+ trap '' TERM HUP INT
+ if [ -n "$child" ]; then
+  kill -TERM "$child" 2>/dev/null || true
+  wait "$child" 2>/dev/null || true
+ fi
+ rm -f "$state/pid" "$state/psplash_fifo"
+ exit 0
+}
+trap cleanup TERM HUP INT
+printf '%s\n' "$$" > "$state/pid"
+n=0
+# Do not hold up init; stop as soon as the real UI is ready to start.
+while [ ! -e "$fb" ] && [ "$n" -lt 100 ]; do
+ [ ! -e "$state/stop" ] || cleanup
+ sleep 0.05; n=$((n+1))
+done
+[ -e "$fb" ] && [ ! -e "$state/stop" ] || cleanup
+PSPLASH_FIFO_DIR="$state" "$psplash" -n &
+child=$!
+# A failed decoder/framebuffer/exec exits here, without restarting or delaying UI.
+wait "$child" 2>/dev/null || true
+cleanup

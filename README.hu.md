@@ -21,6 +21,12 @@ Termékfotók: [Waveshare](https://www.waveshare.net/). A képek a beszállító
 
 [Zero-DISP-7A beszerzés: EU-országonkénti útmutató](docs/display-sourcing-eu.md)
 
+## Saját bootlogó (opcionális)
+
+PNG/SVG kép korai framebuffer-bootlogóként, fordítógépen előkészítve.
+A logó hibája esetén kimarad, az alkalmazás indulását nem akadályozza.
+[Ninja-logóminta és fordítás](docs/boot-logo.hu.md).
+
 ## USB alkalmazás-cartridge (opcionális)
 
 Bekapcsoláskor bent lévő, `autostart.json` fájlt tartalmazó pendrive-ról induló

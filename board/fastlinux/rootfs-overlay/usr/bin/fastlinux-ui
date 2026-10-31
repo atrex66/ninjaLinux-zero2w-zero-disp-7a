@@ -32,6 +32,10 @@ if [ -x /usr/libexec/ninjalinux-usb-app ] && [ -f /run/ninjalinux-usb-app/select
  # Keep the existing supervisor/affinity. The wrapper execs the selected app.
  app=/usr/libexec/ninjalinux-usb-launch
 fi
+# Stop/reap the early framebuffer writer before Qt takes control of KMS.
+if [ -x /usr/libexec/ninjalinux-boot-logo ]; then
+ /usr/libexec/ninjalinux-boot-logo stop
+fi
 if [ "$(cat /sys/devices/system/cpu/isolated 2>/dev/null)" = 2-3 ]; then
  taskset -c 2 "$app" >>/tmp/fastlinux-ui.log 2>&1 &
 else

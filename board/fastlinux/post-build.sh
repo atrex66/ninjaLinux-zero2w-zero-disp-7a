@@ -50,3 +50,8 @@ python3 "$BR2_EXTERNAL_FASTLINUX_PATH/scripts/configure-wifi-image.py" target "$
 if ! grep -q '^BR2_PACKAGE_NINJALINUX_USB_AUTOSTART=y$' "$BR2_CONFIG"; then
  rm -f "$TARGET_DIR/etc/init.d/S30usb-app" "$TARGET_DIR/usr/libexec/ninjalinux-usb-app" "$TARGET_DIR/usr/libexec/ninjalinux-usb-launch"
 fi
+
+# Boot logo is embedded in PSplash at build time; no target image/SVG decoder.
+if ! grep -q '^BR2_PACKAGE_PSPLASH=y$' "$BR2_CONFIG"; then
+ rm -f "$TARGET_DIR/etc/init.d/S12boot-logo" "$TARGET_DIR/usr/libexec/ninjalinux-boot-logo"
+fi

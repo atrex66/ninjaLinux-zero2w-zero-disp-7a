@@ -51,6 +51,14 @@ else
  ! test -e "$TARGET/usr/libexec/ninjalinux-usb-app"
  ! test -e "$TARGET/usr/libexec/ninjalinux-usb-launch"
 fi
+if grep -q '^BR2_PACKAGE_PSPLASH=y$' "$OUT/.config"; then
+ test -x "$TARGET/usr/bin/psplash"
+ test -x "$TARGET/etc/init.d/S12boot-logo"
+ test -x "$TARGET/usr/libexec/ninjalinux-boot-logo"
+else
+ ! test -e "$TARGET/etc/init.d/S12boot-logo"
+ ! test -e "$TARGET/usr/libexec/ninjalinux-boot-logo"
+fi
 cmp "$OUT/images/Image" "$OUT/build/linux-custom/arch/arm64/boot/Image"
 "$OUT/host/bin/mdir" -i "$OUT/images/boot.vfat" :: > "$OUT/images/boot-list.txt"
 ! grep -Ei 'Image-rt|config-normal|config-rt' "$OUT/images/boot-list.txt"
