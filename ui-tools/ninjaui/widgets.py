@@ -200,3 +200,7 @@ class NumericPad(QWidget):
         self.entry.setText(format(float(value), '.12g'))
 
     value = Property(float, lambda s: float(s.entry.text()) if s.entry.text() not in ('-', '-.', '.') else 0.0, setValue)
+
+
+# Re-export keeps one stable Designer/uic header for the entire widget group.
+from .vfd import VfdDisplay

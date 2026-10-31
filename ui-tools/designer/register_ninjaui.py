@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: MIT
 """Loaded only by PC-side pyside6-designer, never by the target runtime."""
 from PySide6.QtDesigner import QPyDesignerCustomWidgetCollection
-from ninjaui.widgets import StatusLed, AxisDisplay, TouchButton, NumericPad
+from ninjaui.widgets import StatusLed, AxisDisplay, TouchButton, NumericPad, VfdDisplay
 
-for cls in (StatusLed, AxisDisplay, TouchButton, NumericPad):
+for cls in (StatusLed, AxisDisplay, TouchButton, NumericPad, VfdDisplay):
     QPyDesignerCustomWidgetCollection.registerCustomWidget(
         cls, module='ninjaui.widgets', group='ninjaLinux',
         tool_tip=cls.__doc__.splitlines()[0], container=False,

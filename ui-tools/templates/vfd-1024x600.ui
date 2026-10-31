@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>NinjaVfdPanel</class>
+ <widget class="QWidget" name="NinjaVfdPanel">
+  <property name="geometry"><rect><x>0</x><y>0</y><width>1024</width><height>600</height></rect></property>
+  <property name="windowTitle"><string>ninjaLinux / Hunor-style VFD</string></property>
+  <property name="styleSheet"><string>QWidget { background: #101c22; color: #e5edf8; font-family: DejaVu Sans; font-size: 20px; } QLabel#titleLabel { font-size: 28px; font-weight: bold; } QLabel#statusLabel { color: #8ba6c7; font-size: 16px; }</string></property>
+  <layout class="QVBoxLayout" name="mainLayout">
+   <property name="spacing"><number>12</number></property>
+   <property name="leftMargin"><number>24</number></property>
+   <property name="rightMargin"><number>24</number></property>
+   <property name="topMargin"><number>24</number></property>
+   <property name="bottomMargin"><number>24</number></property>
+   <item><widget class="QLabel" name="titleLabel"><property name="text"><string>ninjaLinux / Hunor-style VFD</string></property></widget></item>
+   <item><widget class="QLabel" name="textLabel"><property name="text"><string>18 characters · alphanumeric display</string></property></widget></item>
+   <item><widget class="VfdDisplay" name="programVfd"><property name="minimumSize"><size><width>0</width><height>92</height></size></property><property name="text" stdset="0"><string>N 01234 G01 S1500</string></property></widget></item>
+   <item><widget class="QLabel" name="coordinateLabel"><property name="text"><string>Point and comma · no character slot consumed</string></property></widget></item>
+   <item><widget class="VfdDisplay" name="positionVfd"><property name="minimumSize"><size><width>0</width><height>92</height></size></property><property name="text" stdset="0"><string>X-123,456 Z+78.900</string></property></widget></item>
+   <item><widget class="QLabel" name="numericLabel"><property name="text"><string>8-character numeric field / configurable amber color</string></property></widget></item>
+   <item><layout class="QHBoxLayout" name="numericLayout">
+    <property name="spacing"><number>18</number></property>
+    <item><widget class="VfdDisplay" name="numericVfd"><property name="minimumSize"><size><width>0</width><height>92</height></size></property><property name="characterCount" stdset="0"><number>8</number></property><property name="rightAligned" stdset="0"><bool>true</bool></property><property name="decimalSeparator" stdset="0"><string>,</string></property><property name="value" stdset="0"><double>-12.345000</double></property></widget></item>
+    <item><widget class="VfdDisplay" name="amberVfd"><property name="minimumSize"><size><width>0</width><height>92</height></size></property><property name="characterCount" stdset="0"><number>8</number></property><property name="text" stdset="0"><string>READY</string></property><property name="foregroundColor" stdset="0"><color><red>255</red><green>186</green><blue>93</blue></color></property></widget></item>
+   </layout></item>
+   <item><widget class="QLabel" name="statusLabel"><property name="text"><string>OFFLINE · synthetic examples, no HAL connection</string></property></widget></item>
+  </layout>
+ </widget>
+ <customwidgets><customwidget><class>VfdDisplay</class><extends>QWidget</extends><header>ninjaui.widgets</header></customwidget></customwidgets>
+ <resources/>
+ <connections/>
+</ui>

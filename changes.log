@@ -1,5 +1,20 @@
 ninjaLinux-zero2w-zero-disp-7a - changes / változások
 
+2026-10-31 - Designer VFD element / Designer VFD-kijelző
+  EN: Add VfdDisplay based on the Hunor simulator's 14-segment appearance,
+      with source attribution, 1-64 cells, independent point/comma, selectable
+      decimal separator, numeric/text modes, overflow indication, color,
+      brightness, halo and cached QPainter rendering. Register in Designer,
+      add --vfd 1024x600 template and optional read-only HAL numeric binding.
+  HU: VfdDisplay a Hunor szimulátor 14 szegmenses megjelenésével, forráseredettel,
+      1-64 karakterhellyel, külön ponttal/vesszővel, választható tizedesjellel,
+      szám-/szövegmóddal, túlcsordulásjelzéssel, állítható színnel/fényerővel,
+      fényudvarral és gyorsítótárazott QPainter-rajzolással. Designer-regisztráció,
+      --vfd 1024x600-as minta és választható, csak olvasó HAL-számkijelzés.
+  Check: 19 PC tests on PySide6 6.11.2 passed, including Designer properties,
+         exported VFD app, decimal/comma cell layout, numeric overflow, paint
+         cache and failed readouts. Screenshot visually checked. No Pi change.
+
 2026-10-31 - Qt Designer UI tools / Qt Designer fejlesztői csomag
   EN: Add ui-tools: 1024x600 blank/panel templates, Designer custom-widget
       registration, target profile checks, PNG resource/UI compilation,

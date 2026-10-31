@@ -68,7 +68,9 @@ def main():
     commands = p.add_subparsers(dest='command', required=True)
     new = commands.add_parser('new', help='Create a form to edit; never overwrite an existing file')
     new.add_argument('form', type=Path)
-    new.add_argument('--blank', action='store_true')
+    templates = new.add_mutually_exclusive_group()
+    templates.add_argument('--blank', action='store_true')
+    templates.add_argument('--vfd', action='store_true', help='Use the Hunor-style VFD showcase')
     edit = commands.add_parser('designer', help='Open the PySide6 Designer with ninjaLinux widgets')
     edit.add_argument('form', type=Path)
     validate = commands.add_parser('check', help='Validate a .ui without importing Qt')
@@ -85,7 +87,8 @@ def main():
     args = p.parse_args()
     try:
         if args.command == 'new':
-            template = ROOT/'templates'/('blank-1024x600.ui' if args.blank else 'panel-1024x600.ui')
+            name = 'vfd-1024x600.ui' if args.vfd else ('blank-1024x600.ui' if args.blank else 'panel-1024x600.ui')
+            template = ROOT/'templates'/name
             args.form.parent.mkdir(parents=True, exist_ok=True)
             with args.form.open('xb') as out:
                 out.write(template.read_bytes())

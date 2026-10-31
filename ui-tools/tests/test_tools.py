@@ -15,7 +15,7 @@ from ninjaui.profile import check, PROFILE
 from PySide6.QtCore import Qt
 from PySide6.QtTest import QSignalSpy, QTest
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout
-from ninjaui.widgets import AxisDisplay, NumericPad, StatusLed, TouchButton
+from ninjaui.widgets import AxisDisplay, NumericPad, StatusLed, TouchButton, VfdDisplay
 from ninjaui.hal_reader import HalReader, existing_hal_api
 
 APP = QApplication.instance() or QApplication([])
@@ -103,7 +103,7 @@ class ToolsTests(unittest.TestCase):
         for name in PROFILE['custom_widgets']:
             self.assertEqual(registered[name], 'ninjaui.widgets')
         loader = QUiLoader()
-        for cls in (StatusLed, AxisDisplay, TouchButton, NumericPad):
+        for cls in (StatusLed, AxisDisplay, TouchButton, NumericPad, VfdDisplay):
             loader.registerCustomWidget(cls)
         form = loader.load(str(ROOT/'templates/panel-1024x600.ui'))
         self.assertIsNotNone(form, loader.errorString())

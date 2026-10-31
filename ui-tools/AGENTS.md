@@ -44,6 +44,12 @@ public toolkit.
 7. Document the properties, signals, side effects and any special platform needs
    in both READMEs. Refresh the screenshot when the default appearance changes.
 
+VFD-specific additions belong in ninjaui/vfd.py and are re-exported through
+ninjaui.widgets to preserve the same Designer header. Keep the independent
+point/comma behavior, finite-value validation, visible numeric overflow and
+paint-cache invalidation covered by tests. Preserve VFD-ORIGIN.md attribution;
+do not claim the approximation is the original Hunor character ROM.
+
 ## HAL boundary
 
 - Widget imports/constructors must never import hal or connect to a machine.
@@ -60,7 +66,7 @@ public toolkit.
 From ui-tools with a complete PC-side PySide6 installed:
 
 ```sh
-python tests/test_tools.py
+python -m unittest discover -s tests
 python ninjaui_tools.py check templates/panel-1024x600.ui
 python ninjaui_tools.py preview templates/panel-1024x600.ui --offscreen --screenshot work/panel.png --quit-after 400
 ```

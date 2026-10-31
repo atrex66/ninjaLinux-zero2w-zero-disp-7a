@@ -7,7 +7,7 @@ from pathlib import Path
 import stat
 from PySide6.QtCore import QObject, QTimer
 from PySide6.QtWidgets import QWidget
-from .widgets import AxisDisplay, StatusLed
+from .widgets import AxisDisplay, StatusLed, VfdDisplay
 
 
 def existing_hal_api():
@@ -26,7 +26,7 @@ class HalReader(QObject):
     def __init__(self, api, window, report, parent=None):
         super().__init__(parent)
         self.api, self.report = api, report
-        widgets = [w for w in window.findChildren(QWidget) if isinstance(w, (AxisDisplay, StatusLed))]
+        widgets = [w for w in window.findChildren(QWidget) if isinstance(w, (AxisDisplay, StatusLed, VfdDisplay))]
         for widget in widgets:
             widget.setConnected(False)
         self.bindings = [(w, w.halPin) for w in widgets if w.halPin]

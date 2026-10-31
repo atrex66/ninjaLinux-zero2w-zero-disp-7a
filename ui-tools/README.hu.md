@@ -83,6 +83,7 @@ python ninjaui_tools.py preview work/panel.ui --offscreen --screenshot work/pane
 | `AxisDisplay` | `value`, `decimals` (0–6), `axisLabel`, `suffix`, `connected`, `halPin` | Általános számkijelzés; kapcsolat nélkül `—`; nincs koordináta-/szerszámlogika |
 | `TouchButton` | Szokásos QPushButton-tulajdonságok | Egy másodperces tartásra `longPressed()`; felengedéskor a szokásos `clicked()` is megmarad |
 | `NumericPad` | `value` | `accepted(float)`, `cancelled()`; tizedespont, előjel, törlés; beágyazott QWidget |
+| `VfdDisplay` | `text`, `value`, `decimals`, `decimalSeparator`, `characterCount`, színek, fényerő, `halPin` | Hunor-jellegű 14 szegmenses kijelző; külön pont/vessző; választható HAL-értékolvasás |
 
 Csak hosszú nyomásra működő művelethez a `longPressed` jelet kösd be; ne kapjon
 vele ütköző rövid műveletet a `clicked`. A számbillentyűzet értéket jelez,
@@ -104,6 +105,50 @@ képhivatkozásokat. Ez előzetes ellenőrzés: nem bizonyítja minden Qt-tulajd
 elrendezés és grafikus működés hardveres helyességét. A `.ui` és a plugin
 megbízható alkalmazásforrásnak tekintendő, nem elkülönítetten futtatott bemenet.
 A tényleges célgépen is ellenőrizni kell a kész alkalmazást.
+
+## Hunor-jellegű VFD-kijelző
+
+![Hunor-jellegű VFD ponttal, vesszővel és állítható színnel](screenshots/vfd.png)
+
+A hozzá tartozó 1024×600-as minta létrehozása és megnyitása:
+
+```sh
+python ninjaui_tools.py new --vfd work/vfd.ui
+python ninjaui_tools.py designer work/vfd.ui
+python ninjaui_tools.py preview work/vfd.ui
+```
+
+Bármelyik formra ráhúzható a **ninjaLinux** csoport **VfdDisplay** eleme.
+A türkizzöld, 14 szegmenses megjelenés a meglévő Hunor webes szimulátorét
+követi. QPainter rajzolja, változásig gyorsítótárazza; nem kell hozzá SVG,
+OpenGL, külön betűkészlet, szimulátor vagy vezérlőhardver.
+[Forráseredet és referencia](VFD-ORIGIN.md).
+
+| Tulajdonság | Jelentés |
+|---|---|
+| `text` | Alfanumerikus szöveg, nagybetűsen; ismeretlen karakter helyett `?` |
+| `characterCount` | 1–64 karakterhely; alapból 18, mint a szimulátor egy kijelzőbankja |
+| `value`, `decimals` | Számbevitel `setValue(float)` segítségével; 0–6 tizedesjegy |
+| `decimalSeparator` | `.` vagy `,` a számformázáshoz; alapból `.` |
+| `rightAligned` | Jobbra igazítás a rögzített szélességű karakterbankban |
+| `foregroundColor`, `backgroundColor`, `offColor` | Aktív szegmensek, kijelzőüveg és inaktív szegmensek színe |
+| `brightness`, `glow` | 0–100 fényerő és választható fényudvar |
+| `connected`, `halPin` | Adathiányjelzés és választható numerikus pinolvasás |
+| `overflow` | Csak olvasható: az adat túlnyúlik a rendelkezésre álló karakterhelyeken |
+
+A `.` és a `,` az előző karakter mellé kerül, külön karakterhely nélkül.
+A vesszőnek látható szára van; a szöveg eleji elválasztó üres helyhez kerül.
+A szöveg- és számmód ugyanazt a kijelzőt használja: az utolsó `setText` vagy
+`setValue` érvényes. A `decimalSeparator` a számmódot formázza újra, a szó
+szerint megadott `text` tartalmát nem módosítja. Túl hosszú szám helyett minden
+helyen teljes szegmensjelzés (`#`) látszik, így nem marad csonkolt szám a kijelzőn.
+A hosszú szöveg levágódik, `overflow=True` mellett. Adathiánykor `NO DATA`,
+hétnél rövidebb banknál vonalak jelennek meg. A referencia `:` karaktere
+homokóra, nem szokásos kettőspont; ez nem az eredeti Hunor karakter-PROM másolata.
+A `setText(str)` és `setValue(float)` Qt-slotként is elérhető.
+
+Az export és a Pi-s indítás megegyezik a többi forméval. A választható HAL-olvasó
+számkijelzőként kezeli; kimenetvezérlés ezzel sem kerül bele.
 
 ## Export és kézi Pi-próba
 
@@ -169,14 +214,14 @@ Az eredeti eszközkód a repó [MIT licence](../LICENSE) alatt áll;
 a Qt/PySide és a felhasznált külső képek megtartják saját feltételeiket.
 
 ```sh
-python tests/test_tools.py
+python -m unittest discover -s tests
 ```
 
 Ellenőrzés 2026-10-31-én, Linux/amd64, Python 3.13, PC-s PySide6 6.11.2:
-11 sikeres teszt, tényleges generált UI-/erőforrás-futtatással,
-Designer-regisztrációval és formbetöltéssel, beviteli/tartási próbával és
-ál-HAL-adatok hibakezelésével. A Designer offscreen módban megnyitotta a formot.
+19 sikeres teszt, tényleges generált UI-/erőforrás-futtatással,
+Designer-regisztrációval és formbetöltéssel, beviteli/tartási próbával, VFD-karakter/pont/vessző/formázás/gyorsítótár
+ellenőrzésével és ál-HAL-adatok hibakezelésével. A Designer offscreen módban megnyitotta a formot.
 A panel a gép PySide6 6.8.2.1 környezetével is exportálható és futott.
-Mindkét lap 1024×600-as képét szemrevételezéssel ellenőriztük.
+Mindkét panellap és a VFD-minta 1024×600-as képét szemrevételezéssel ellenőriztük.
 Windows-, fizikai érintési, EGLFS/OpenGL- és élő Pi-HAL-próba ebben a körben
 nem történt.
