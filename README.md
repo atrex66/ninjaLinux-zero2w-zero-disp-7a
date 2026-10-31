@@ -195,3 +195,11 @@ Binary release candidates include the generic SD image, SHA256 checksums and
 a corresponding-source bundle with Buildroot, applied patches, project source,
 package licenses, and pinned GCC/glibc runtime sources. The separately
 personalized test image, SD backups, local logs and personal keys are excluded.
+
+## Remote access guides
+
+- [SSHFS: mount remote files from Linux](docs/sshfs.md)
+- [Original HALShow: connect and watch the running Pi HAL](docs/halshow.md)
+- [Windows: PowerShell SSH, WinSCP and WSL2 HALShow](docs/windows-remote.md)
+
+See [changes.log](changes.log) for the project change history. The application has its own repository and operator manuals.

@@ -1,0 +1,30 @@
+ninjaLinux-zero2w-zero-disp-7a - changes / változások
+
+2026-10-31 - Remote access documentation / Távoli elérés dokumentáció
+  EN: Separate English/Hungarian SSHFS and original HALShow usage guides.
+      Windows instructions cover OpenSSH Client, WinSCP's custom SFTP-server
+      path, and original HALShow through WSL2/WSLg. Distinguish file access,
+      live read-only HAL diagnostics and screen sharing. Document key setup,
+      missing-helper/agent cases and old v0.1.0-rc1 image limitations.
+  HU: Külön magyar/angol SSHFS- és eredeti HALShow-kezelési útmutató.
+      Windows: OpenSSH-kliens, WinSCP egyedi SFTP-segéddel, eredeti HALShow
+      WSL2/WSLg alatt. Fájlelérés, élő olvasó HAL-diagnosztika és képtükrözés
+      megkülönböztetése; kulcsok, hiányzó segédek és régi kép korlátai.
+
+2026-10-31 - 610b189 - Original remote HALShow / Eredeti távoli HALShow
+  EN: Preserve the original LinuxCNC Tcl/Tk viewer; add a read-only SSH
+      adapter and target agent for the existing private Automation HAL.
+      Connection dialog supports IP, user, port, identity and known-hosts.
+  HU: Eredeti LinuxCNC Tcl/Tk néző, olvasó SSH-adapter és célgépi agent a
+      meglévő privát Automation HAL-hoz. IP/felhasználó/port/kulcs/gépkulcs
+      fájl beállítására alkalmas kapcsolódási ablak.
+
+2026-10-31 - 9a93c71 - Release documentation / Kiadási dokumentáció
+  EN: Link verified generic RT SD image and corresponding source release.
+  HU: Ellenőrzött generikus RT SD-kép és hozzá tartozó forráskiadás linkjei.
+
+2026-10-31 - a1cc2b1 - Initial repository / Kezdeti repó
+  EN: RT-only Zero 2 W / Zero-DISP-7A appliance, Qt/PySide6 EGLFS,
+      standalone HAL, measured IRQ/core isolation and bilingual README.
+  HU: Kizárólag RT-kerneles Zero 2 W / Zero-DISP-7A rendszer, Qt/PySide6
+      EGLFS, leválasztott HAL, mért IRQ/magizoláció és kétnyelvű README.

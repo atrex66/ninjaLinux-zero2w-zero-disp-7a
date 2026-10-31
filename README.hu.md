@@ -200,3 +200,11 @@ hozzá tartozó forráscsomag érhető el: Buildroot, alkalmazott patchek,
 projektforrás, csomaglicencek és a rögzített GCC/glibc runtime-források.
 A személyre szabott tesztkép, SD-mentések, helyi naplók és személyes kulcsok
 nem részei a kiadásnak.
+
+## Távoli elérés útmutatói
+
+- [SSHFS: a Pi fájljainak csatolása Linuxról](docs/sshfs.hu.md)
+- [Eredeti HALShow: kapcsolódás és az élő Pi HAL figyelése](docs/halshow.hu.md)
+- [Windows: PowerShell SSH, WinSCP és WSL2 HALShow](docs/windows-remote.hu.md)
+
+A projekt változásait a [changes.log](changes.log) tartalmazza. Az alkalmazás külön repóban, saját kezelési útmutatókkal készül.
