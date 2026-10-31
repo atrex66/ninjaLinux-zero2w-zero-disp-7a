@@ -105,6 +105,8 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/Makefile.modinc DESTINATION share/auto
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/halcompile DESTINATION bin COMPONENT dev)
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/ahal DESTINATION bin COMPONENT runtime)
 install(PROGRAMS tools/runner.py DESTINATION libexec COMPONENT runtime)
+install(PROGRAMS tools/remote-halshow/remote_agent.py
+  DESTINATION libexec RENAME halshow_agent.py COMPONENT runtime)
 install(FILES tools/cpu_layout.py DESTINATION libexec COMPONENT runtime)
 install(FILES packaging/cpu-layout.json DESTINATION share/automation-hal COMPONENT runtime)
 install(DIRECTORY examples/ DESTINATION share/automation-hal/examples COMPONENT runtime)

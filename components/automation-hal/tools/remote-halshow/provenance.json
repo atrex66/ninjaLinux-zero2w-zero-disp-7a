@@ -1,0 +1,11 @@
+{
+  "origin": "own LinuxCNC 2.9.10 working-tree HALShow, copied unchanged",
+  "source": "/home/ninja/magorCNC/linuxcnc-2.9.10/tcl/bin",
+  "upstream": "https://github.com/LinuxCNC/linuxcnc/blob/master/tcl/bin/halshow.tcl",
+  "license": "GPL-2.0 for HALShow; original cbutton.tcl header retained",
+  "unchanged_vendor_files": {
+    "halshow.tcl": "23b64ee9bb9c4e7750a97a77ce15751b761529d8080c10cea55bc28d01889c19",
+    "cbutton.tcl": "0373210ba20a37582cc1700f072679d293095a774a45b83c417a67bc077e8ecd"
+  },
+  "runtime_adaptation": "HAL command backed by remote snapshots; write controls suppressed"
+}
