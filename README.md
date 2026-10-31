@@ -21,6 +21,8 @@ Product photos: [Waveshare](https://www.waveshare.net/). Images are linked from 
 
 [Where to buy the Zero-DISP-7A: EU country guide](docs/display-sourcing-eu.md)
 
+Application development boundaries and `/data` packaging rules: [AGENTS.md](AGENTS.md) (Hungarian).
+
 ## On-demand browser file explorer (optional)
 
 Manage `/data` from a desktop/phone browser: upload/download, rename, folders,

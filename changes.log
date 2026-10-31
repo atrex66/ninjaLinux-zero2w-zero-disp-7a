@@ -1,5 +1,15 @@
 ninjaLinux-zero2w-zero-disp-7a - changes / változások
 
+2026-10-31 - Application/system boundary / Alkalmazás-rendszerhatár
+  EN: Add root AGENTS.md: application work must never alter OS components;
+      keep app-owned code, dependencies and persistent state under /data.
+      Document cartridge storage and the current fixed-prefix RT HAL loader
+      limitation separately from supported /data HAL files/loadusr programs.
+  HU: Gyökérszintű AGENTS.md: alkalmazásfejlesztéskor tilos a rendszerkomponensek
+      módosítása; az app saját komponensei és állapota /data alá kerüljenek.
+      Cartridge-tárolás és a jelenlegi RT HAL-betöltési korlát dokumentálva.
+  Check: Read-only source inspection; documentation only, no runtime change.
+
 2026-10-31 - On-demand browser file explorer / Igény szerinti böngészős fájlkezelő
   EN: Add opt-in NINJALINUX_FILE_EXPLORER with a local /data file manager,
       per-device access code, upload/download, folders, non-overwriting rename,

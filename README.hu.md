@@ -21,6 +21,8 @@ Termékfotók: [Waveshare](https://www.waveshare.net/). A képek a beszállító
 
 [Zero-DISP-7A beszerzés: EU-országonkénti útmutató](docs/display-sourcing-eu.md)
 
+Alkalmazásfejlesztési rendszerhatár és `/data`-elhelyezés: [AGENTS.md](AGENTS.md).
+
 ## Igény szerint induló böngészős fájlkezelő (opcionális)
 
 A `/data` kezelése PC-s/telefonos böngészőből: feltöltés, letöltés, átnevezés,
