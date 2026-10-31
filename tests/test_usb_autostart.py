@@ -21,6 +21,9 @@ class USBTests(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.root = Path(self.tmp.name)
+        volume_patch = patch.object(usb, 'VOLUMES', self.root / 'cartridges')
+        volume_patch.start()
+        self.addCleanup(volume_patch.stop)
         (self.root / 'app.py').write_text('print("test")')
         self.data = dict(version=1, type='python3', program='app.py', args=['árvíz', 'a b', '$(touch nope)'])
 
@@ -86,6 +89,7 @@ class USBTests(unittest.TestCase):
     def test_unique_app_selected_and_volume_read_only(self):
         state, actions = self.boot({'/dev/sda1': self.data})
         selection = json.loads((state / 'selected.json').read_text())
+        self.assertEqual(selection['root'], str(usb.VOLUMES / 'volume-sda1'))
         self.assertIn('volume-sda1/app.py', selection['argv'][1])
         self.assertIn('ro,nodev,nosuid,utf8=1', actions[0])
         self.assertFalse(any(a[0] == 'umount' for a in actions))
@@ -110,11 +114,12 @@ class USBTests(unittest.TestCase):
                 patch.object(usb.os, 'execv') as execute, patch.dict(os.environ, {}, clear=True):
             usb.launch()
             self.assertEqual(os.environ['HOME'], str(state / 'home'))
+            self.assertEqual(os.environ['NINJALINUX_CARTRIDGE_ROOT'], str(usb.VOLUMES / 'volume-sda1'))
             self.assertEqual(os.environ['PYTHONDONTWRITEBYTECODE'], '1')
             self.assertTrue(os.environ['XDG_CONFIG_HOME'].startswith(str(state)))
-            cd.assert_called_once_with(str(state / 'volume-sda1'))
+            cd.assert_called_once_with(str(usb.VOLUMES / 'volume-sda1'))
             execute.assert_called_once_with('/usr/bin/python3',
-                ['/usr/bin/python3', str(state / 'volume-sda1/app.py')] + self.data['args'])
+                ['/usr/bin/python3', str(usb.VOLUMES / 'volume-sda1/app.py')] + self.data['args'])
 
     def test_discovery_excludes_sd_and_non_usb_disks_and_parent_disk(self):
         sys = self.root / 'sys'
@@ -153,7 +158,7 @@ class USBTests(unittest.TestCase):
         state, actions = self.boot({'/dev/sda1': self.data | dict(writable=True)})
         self.assertEqual([a[0] for a in actions], ['mount', 'umount', 'mount'])
         self.assertIn('rw,nodev,nosuid,utf8=1', actions[-1])
-        home = state / 'volume-sda1/.ninjalinux-state'
+        home = usb.VOLUMES / 'volume-sda1/.ninjalinux-state'
         self.assertTrue((home / 'config').is_dir())
         with patch.object(usb, 'STATE', state), patch.object(usb.os, 'chdir'), \
                 patch.object(usb.os, 'execv'), patch.dict(os.environ, {}, clear=True):

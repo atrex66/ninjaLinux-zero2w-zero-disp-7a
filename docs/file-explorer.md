@@ -83,8 +83,8 @@ the `EN`/`HU` button switches languages.
 
 Changes do not automatically restart HAL or the UI. The root partition stays
 read-only. Symlinks/special files are neither followed nor modified; each
-listing supports at most 5000 entries. Separate cartridge mounts live under
-`/run` and are outside this explorer's scope.
+listing supports at most 5000 entries. Cartridge mounts below `/data/cartridges` are also browsable; writes
+require the cartridge's `writable: true` setting.
 
 The access code stays only in the browser tab's memory; reloading/signing out
 requires entering it again. Filenames/content are never executed as HTML.

@@ -23,6 +23,9 @@ Termékfotók: [Waveshare](https://www.waveshare.net/). A képek a beszállító
 
 Alkalmazásfejlesztési rendszerhatár és `/data`-elhelyezés: [AGENTS.md](AGENTS.md).
 
+Saját RTAPI-modulok telepítése rendszerfile-csere nélkül, appból vagy USB-ről:
+[HAL-modulok a /data alatt](docs/hal-app-modules.hu.md).
+
 ## Igény szerint induló böngészős fájlkezelő (opcionális)
 
 A `/data` kezelése PC-s/telefonos böngészőből: feltöltés, letöltés, átnevezés,

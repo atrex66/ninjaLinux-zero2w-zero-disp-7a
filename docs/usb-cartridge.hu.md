@@ -112,6 +112,17 @@ szokásos szolgáltatásai (pl. SSH-kulcsok kezelése) ettől függetlenül műk
 Ez nem alkalmazás-sandbox: a cartridge a jelenlegi UI felhasználójával,
 rootként fut. Saját, megbízható alkalmazás-cartridge-ot használj.
 
+## Elérési út és realtime modulok
+
+A kiválasztott USB-kötet `/data/cartridges/volume-sdX…` alá csatolódik,
+nem a belső `/data` tetejére. A vezérlőállapot (`selected.json`, `scanned`)
+továbbra is RAM-ban, `/run/ninjalinux-usb-app` alatt van. Az app megkapja a
+`NINJALINUX_CARTRIDGE_ROOT` változót a tényleges kötettel; ezt használja,
+ne konkrét eszköznevet. A saját `rtlib/` innen is betölthető a támogatott
+`--rtlib` opcióval: [realtime modulok](hal-app-modules.hu.md).
+A böngészős fájlkezelő a csatolt kötetet is látja. A `writable` beállítás
+továbbra is a cartridge készítőjének döntése.
+
 ## Diagnosztika és ellenőrzés
 
 SSH-n:

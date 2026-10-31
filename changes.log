@@ -1,5 +1,17 @@
 ninjaLinux-zero2w-zero-disp-7a - changes / változások
 
+2026-10-31 - Data/cartridge realtime modules / Realtime modulok /data és cartridge alól
+  EN: Add explicit repeatable --rtlib session directories, preserving system
+      module priority and system-only hal_lib. Reject app-module symlinks.
+      Mount cartridges below /data/cartridges and export their root to apps;
+      the web explorer can browse them. Keep system files immutable for apps.
+  HU: Explicit --rtlib munkamenet-könyvtárak, rendszermodulok elsőbbségével;
+      hal_lib csak rendszerből. Cartridge-mount /data/cartridges alatt,
+      NINJALINUX_CARTRIDGE_ROOT, webes elérés és frissített AGENTS.md.
+  Check: 54 tests; native HAL/SDK build and isolated RTAPI module compilation/load,
+         running pin, search priority/path rejection. PC sim scheduling only;
+         full Pi image, physical USB/RT/I/O tests and deployment pending.
+
 2026-10-31 - Application/system boundary / Alkalmazás-rendszerhatár
   EN: Add root AGENTS.md: application work must never alter OS components;
       keep app-owned code, dependencies and persistent state under /data.

@@ -72,6 +72,21 @@ static RtapiApp *makeApp()
     return new Posix(SCHED_FIFO);
 }
 ''' + s[end:]
+s = s.replace('#include "config.h"', '#include "config.h"\n#include "module_path.hh"')
+old_path = '''        char what[LINELEN+1];
+        snprintf(what, LINELEN, "%s/%s.so", EMC2_RTLIB_DIR, name.c_str());
+        void *module = modules[name] = dlopen(what, RTLD_GLOBAL | RTLD_NOW);'''
+new_path = '''        std::string what, path_error;
+        if (!ahal_module_path(name, EMC2_RTLIB_DIR, getenv("AHAL_RTLIB_PATH"), what, path_error)) {
+            rtapi_print_msg(RTAPI_MSG_ERR, "Automation HAL module %s: %s\\n", name.c_str(), path_error.c_str());
+            modules.erase(name);
+            return -1;
+        }
+        void *module = modules[name] = dlopen(what.c_str(), RTLD_GLOBAL | RTLD_NOW);'''
+if old_path not in s:
+    raise RuntimeError('Module loader patch context missing')
+s = s.replace(old_path, new_path)
+
 s = s.replace('"/.rtapi_fifo"', '"/.automation-hal.sock"')
 s = s.replace('    do_load_cmd("hal_lib", vector<string>());',
               '    App(); // validate requested mode before accepting modules\n'

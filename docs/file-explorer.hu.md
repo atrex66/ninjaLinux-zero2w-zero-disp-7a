@@ -86,8 +86,8 @@ beállított portot használd; helyi Wi-Fi AP-n a Pi AP-címe is használható.
 Fájlmódosítás nem indítja újra automatikusan a HAL-t vagy a grafikus appot.
 A készülék belső gyökérpartícióját nem teszi írhatóvá. Symlinkeket és
 speciális fájlokat nem követ és nem módosít; egy mappanézet maximum 5000
-bejegyzést kezel. Külön cartridge-kötetek a `/run` alatt vannak, így ezen
-felületen nem böngészhetők.
+bejegyzést kezel. A `/data/cartridges` alá csatolt USB-cartridge-ok is böngészhetők;
+írni csak a cartridge által engedélyezett `writable: true` módban lehet.
 
 A kód csak az adott böngészőlap memóriájában marad: frissítés vagy kilépés
 után újra be kell írni. Fájlnevek és tartalmak nem kerülnek HTML-ként

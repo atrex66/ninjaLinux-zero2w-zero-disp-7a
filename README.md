@@ -23,6 +23,9 @@ Product photos: [Waveshare](https://www.waveshare.net/). Images are linked from 
 
 Application development boundaries and `/data` packaging rules: [AGENTS.md](AGENTS.md) (Hungarian).
 
+Install app/cartridge RTAPI modules without replacing system files:
+[HAL modules under /data](docs/hal-app-modules.md).
+
 ## On-demand browser file explorer (optional)
 
 Manage `/data` from a desktop/phone browser: upload/download, rename, folders,

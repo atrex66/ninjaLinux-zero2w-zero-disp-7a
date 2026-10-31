@@ -132,62 +132,55 @@ környezetét használja. Egy userspace Python-folyamat nem válik realtime
 komponenssé attól, hogy HAL-pineket ad. A realtime időzítést igénylő feladatot
 nem szabad észrevétlenül GUI/Python ciklusra áttenni.
 
-### Saját realtime .so modul: a jelenlegi rendszerben nem közvetlenül
+### Saját realtime .so modul: igen, explicit --rtlib könyvtárral
 
-A jelenlegi forrás szerinti `rtapi_app` a fordításkori `EMC2_RTLIB_DIR`
-könyvtárból tölti a `loadrt <név>` modulokat. Az image prefixe
-`/opt/automation-hal`, tehát ez `/opt/automation-hal/rtlib/<név>.so`.
-A modulnévben `/` és `..` tiltott. Ezért ez **nem támogatott**:
+A kiegészített platform támogatja az alkalmazássaját RTAPI `.so` modulokat.
+A régi kiadott image-eknél ezt ne feltételezd automatikusan. A modul az adott
+ninjaLinux SDK-val és AArch64 toolchainnel készüljön, a megfelelő ABI/IPC szerint;
+a `halcompile --compile` kimenetét másold az app saját `rtlib/` könyvtárába.
+Ne használd a rendszerprefixbe telepítő `halcompile --install` parancsot.
 
-```hal
-# NEM működő példa a jelenlegi betöltővel:
-# loadrt /data/apps/my-app/rtlib/my_component.so
+```sh
+ninjalinux-hal start /data/apps/my-app/hal/main.hal \
+  --rtlib /data/apps/my-app/rtlib
 ```
 
-A runner beállít ugyan `HAL_RTMOD_DIR` változót, de a jelenlegi userspace
-betöltő nem ebből választ könyvtárat. Egy környezeti változó átadása önmagában
-nem igazolja a `/data/rtlib` támogatását. A `halcompile --install` alapból a
-rendszer SDK prefixébe telepítene: alkalmazásfejlesztéskor ez is tilos.
+A `.hal` fájlban `loadrt my_component`, nem teljes fájlútvonal szerepel.
+A `--rtlib` ismételhető. A rendszer meglévő moduljai mindig elsőbbséget
+élveznek, `hal_lib` csak rendszerből jöhet. Saját modul legyen közönséges
+fájl, ne symlink; a modulnévben `/` és `..` tiltott. A launcher kizárólag az
+explicit könyvtárakból állít elő belső keresési útvonalat, az örököltet törli.
+A könyvtárak a munkamenet indításakor rögzülnek. A saját `.so` nem kernelmodul.
 
-A saját RT-forrás és célra fordított `.so` tárolható az app `hal/` és `rtlib/`
-könyvtárában, de ezt még nem szabad működő betöltési megoldásnak nevezni.
-Ne másold a modult `/opt/automation-hal/rtlib` alá, ne hozz létre oda symlinket,
-és ne cseréld le a rendszerszintű betöltőt az app kedvéért.
+Ez a támogatás nem engedély az `/opt/automation-hal` vagy bármely más
+rendszerkomponens átírására. Ne másold a saját modult rendszermappába,
+ne hozz létre oda symlinket, ne cseréld le a betöltőt az app kedvéért.
+Másik RT-binary hibáját se kezeld rendszerfile-cserével. Részletek és
+ellenőrzési határok: `docs/hal-app-modules.hu.md`.
 
-A `/data`-alapú RT-modulkeresés külön, explicit platformfejlesztési feladat,
-kompatibilitási/betöltési tesztekkel. Alkalmazásfejlesztési feladatban nem
-szabad automatikusan megvalósítani. Külön HAL-prefixre fordított appprivát
-runtime is külön architektúra-egyeztetést és izolációs ellenőrzést igényel;
-a fix prefixű rendszer-runtime egyszerű átmásolása nem relocálja a binárisait.
-Két runtime közös IPC-névtérben nem tekinthető támogatott megoldásnak.
+## USB-cartridge a /data alatt
 
-Forrásbizonyítékok:
+A cartridge a `/data/cartridges/<kötet>` alá csatolódik: nem fedi el a belső
+`/data` tartalmát. Az app összes saját komponense a pendrive-on maradhat,
+beleértve a `rtlib/` könyvtárat is. Az app használja a
+`NINJALINUX_CARTRIDGE_ROOT` változót, ne égessen be `sdX` eszköznevet.
 
-- `components/automation-hal/vendor/src/rtapi/uspace_rtapi_app.cc`: `do_load_cmd`.
-- `components/automation-hal/cmake/config.h.in`: `EMC2_RTLIB_DIR`.
-- `components/automation-hal/tools/runner.py`: `runtime_environment`.
-- `components/automation-hal/cmake/Makefile.modinc.in`: SDK telepítési cél.
-- `package/automation-hal/automation-hal.mk`: rendszer-prefix és `ahal` user.
+A készítő az `autostart.json` fájlban adja meg a `writable` értéket.
+Írható módban HOME/XDG az USB-n lévő `.ninjalinux-state` alatt marad;
+csak olvasható módban RAM-ba kerül. A RT-modulok betöltéséhez elég az olvasás.
+Ne irányítsd át a cartridge tartós állapotát a belső SD-re a készítő kifejezett
+döntése nélkül. Részletek: `docs/usb-cartridge.hu.md`.
 
-Ezek a repo aktuális forrására vonatkoznak; egy korábban kézzel módosított
-célgép eltérhet. Az élő Pi állapotát ne állítsd ellenőrzöttnek forrásolvasás alapján.
-
-## USB-cartridge: szándékos, alkalmazássaját kivétel a tárolási helyre
-
-A cartridge-futtatásra adott kifejezett feladatnál az app minden saját
-komponense a pendrive-on lehet: ez a `/data` alatti normál telepítés alternatívája,
-nem engedély a rendszer módosítására. A készítő az `autostart.json` fájlban
-adja meg a `writable` értéket. Írható módban HOME/XDG az USB-n lévő
-`.ninjalinux-state` alatt marad; csak olvasható módban RAM-ba kerül.
-Ne irányítsd át a cartridge tartós állapotát a belső `/data` alá a készítő
-kifejezett döntése nélkül. Részletek: `docs/usb-cartridge.hu.md`.
+A felismerés nem indít automatikusan HAL-t. A saját app indítója a meglévő
+`ninjalinux-hal start ... --rtlib ...` felületet használhatja, megfelelő
+engedélyezés mellett; ne állítson le vagy cseréljen le másik élő HAL-t.
 
 ## Ellenőrzés és átadás
 
 Először PC-n, offscreen vagy eldobható, izolált környezetben tesztelj.
 A host/Pi LinuxCNC/HAL IPC-jét, élő gépi munkamenetét és I/O-ját ne használd
 próbaterületnek. Célgépi telepítésnél a változó fájlok listája kizárólag
-alkalmazássaját `/data` útvonalakat tartalmazhat; a cartridge-kivétel fent van.
+alkalmazássaját `/data` útvonalakat tartalmazhat; a cartridge-tárolás szabálya fent van.
 A futó HAL, alkalmazás vagy készülék leállítása/újraindítása nem automatikus
 része egy forrásmódosításnak. Bootloop vagy káros regresszió után ne próbálkozz
 újabb telepítéssel/firmware-rel; egyeztetett helyreállítási feladat kell.

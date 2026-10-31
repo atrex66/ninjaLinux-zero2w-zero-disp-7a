@@ -42,7 +42,21 @@ def clean_shared_memory():
             raise OSError(ctypes.get_errno(), 'Cannot remove detached HAL shared memory')
 
 
-def runtime_environment():
+def module_directories(paths):
+    result = []
+    for path in paths:
+        raw = Path(path)
+        if not raw.is_absolute() or ':' in str(raw):
+            raise ValueError('RT module directories must be absolute and contain no colon')
+        resolved = raw.resolve(strict=True)
+        if not resolved.is_dir():
+            raise ValueError(f'Not a module directory: {resolved}')
+        if str(resolved) not in result:
+            result.append(str(resolved))
+    return result
+
+
+def runtime_environment(rtlib=()):
     directory = Path('/tmp') / f'automation-hal-{os.getuid()}'
     directory.mkdir(mode=0o700, exist_ok=True)
     info = directory.lstat()
@@ -52,6 +66,10 @@ def runtime_environment():
     env.pop('RTAPI_UID', None)
     env['RTAPI_FIFO_PATH'] = str(directory / 'control.sock')
     env['HAL_RTMOD_DIR'] = str(PREFIX / 'rtlib')
+    # Only explicit session options select app code, never an ambient variable.
+    env.pop('AHAL_RTLIB_PATH', None)
+    if rtlib:
+        env['AHAL_RTLIB_PATH'] = ':'.join(module_directories(rtlib))
     return directory, env
 
 
@@ -61,6 +79,8 @@ def main():
     run = commands.add_parser('run', help='own and supervise a HAL session')
     run.add_argument('--mode', choices=('sim', 'realtime'), required=True)
     run.add_argument('-i', '--ini')
+    run.add_argument('--rtlib', action='append', default=[], type=Path,
+                     help='additional app RT module directory (repeatable; system modules win)')
     run.add_argument('--cpu-config', type=Path, help='shared HAL/UI CPU layout JSON')
     run.add_argument('configuration', type=Path)
     for name in ('cmd', 'compile', 'python'):
@@ -76,7 +96,7 @@ def main():
         cpu_config = selected_config(args.cpu_config)
         if cpu_config is not None:
             apply_role('hal', cpu_config)
-    directory, env = runtime_environment()
+    directory, env = runtime_environment(args.rtlib if args.command == 'run' else ())
     if args.command == 'python':
         os.execve('/usr/bin/python3', ['python3', *sys.argv[2:]], env)
     if args.command == 'cmd':

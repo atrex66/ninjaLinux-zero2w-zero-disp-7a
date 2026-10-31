@@ -108,6 +108,16 @@ an app or alter internal `/data` configuration. Ordinary services, including
 SSH key management, still operate independently. This is not a sandbox:
 cartridges run as the existing UI user, root. Use trusted cartridges.
 
+## Mount location and realtime modules
+
+Selected USB volumes mount below `/data/cartridges/volume-sdX…`, leaving the
+internal `/data` visible. Control state (`selected.json`, `scanned`) remains
+in RAM at `/run/ninjalinux-usb-app`. The app receives
+`NINJALINUX_CARTRIDGE_ROOT` with the actual mount location; use it instead of
+hardcoding a disk name. Its own `rtlib/` can be selected through the supported
+`--rtlib` option: [realtime modules](hal-app-modules.md). The web explorer also
+sees mounted cartridges. The author still decides `writable` in the manifest.
+
 ## Diagnostics and verification
 
 Over SSH:

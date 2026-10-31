@@ -24,6 +24,7 @@ set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
 execute_process(COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/prepare_sources.py
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor ${U} COMMAND_ERROR_IS_FATAL ANY)
 configure_file(cmake/config.h.in generated/config.h @ONLY)
+configure_file(runtime/module_path.hh generated/module_path.hh COPYONLY)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/generated ${U}/src ${U}/src/rtapi
   ${U}/src/hal ${U}/src/emc ${U}/src/libnml/inifile ${BOOST_INCLUDE_DIR})
 add_compile_definitions(_GNU_SOURCE)

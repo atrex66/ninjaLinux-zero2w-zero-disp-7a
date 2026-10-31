@@ -68,3 +68,20 @@ az amd64-es izolált környezet eredménye, nem Pi-n elvégzett futási teszt.
 Az elkészült amd64 `.deb` csomagok a PC-s izolált teszt artefaktumai, nem Pi-re
 telepíthető csomagok. A Pi-hez külön arm64 csomagok készültek. A gazdagépre
 és a Pi-re nem telepítettem ezt a HAL-t.
+
+
+## 2026-10-31: app/cartridge module paths (native PC)
+
+A fresh native CMake build and DESTDIR-only staging install were tested with
+`tools/test_app_modules.sh`. The wrapper creates a new tmpfs root plus private
+PID/IPC/network namespaces. It compiles a genuine `.comp` fixture with the SDK,
+keeps the `.so` under `/data/cartridges/test-app/rtlib`, starts a HAL session
+with explicit repeated `--rtlib`, and verifies increasing cyclic pin values.
+System `threads.so` beats a corrupt app file of the same name; absolute module
+names, app-module symlinks and implicit ambient search paths are rejected.
+The system prefix is bound read-only. No host or Pi HAL session was touched.
+
+Scheduling was **sim**, on the native PC architecture. This does not prove
+AArch64 image integration, a physical USB mount, PREEMPT_RT latency or I/O.
+Those tests and target deployment remain pending. No rebuilt `.deb`/SD release
+is claimed by this source change.

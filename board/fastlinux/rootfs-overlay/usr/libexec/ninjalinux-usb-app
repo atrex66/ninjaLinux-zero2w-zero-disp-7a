@@ -9,6 +9,7 @@ import time
 
 STATE = Path('/run/ninjalinux-usb-app')
 SYS = Path('/sys/class/block')
+VOLUMES = Path('/data/cartridges')
 FILESYSTEMS = ('vfat', 'ext4')
 
 
@@ -80,6 +81,7 @@ def prepare():
     if marker.exists():
         return
     marker.touch()  # No rescanning until reboot, even when no valid stick exists.
+    VOLUMES.mkdir(mode=0o755, parents=True, exist_ok=True)
     selections = []
     mounted = []
     seen = set()
@@ -89,8 +91,8 @@ def prepare():
             if device in seen:
                 continue
             seen.add(device)
-            root = STATE / ('volume-' + Path(device).name)
-            root.mkdir(mode=0o700, exist_ok=True)
+            root = VOLUMES / ('volume-' + Path(device).name)
+            root.mkdir(mode=0o755, exist_ok=True)
             for fs in FILESYSTEMS:
                 options = 'ro,nodev,nosuid,' + ('utf8=1' if fs == 'vfat' else 'noload')
                 if run(['mount', '-t', fs, '-o', options, device, str(root)]):
@@ -147,7 +149,8 @@ def launch():
     home.mkdir(mode=0o700, exist_ok=True)
     os.environ.update(HOME=str(home), XDG_CACHE_HOME=str(home / 'cache'),
                       XDG_CONFIG_HOME=str(home / 'config'), XDG_DATA_HOME=str(home / 'data'),
-                      PYTHONDONTWRITEBYTECODE='1', NINJALINUX_USB_APP='1')
+                      PYTHONDONTWRITEBYTECODE='1', NINJALINUX_USB_APP='1',
+                      NINJALINUX_CARTRIDGE_ROOT=selection['root'])
     os.chdir(selection['cwd'])
     os.execv(selection['argv'][0], selection['argv'])
 

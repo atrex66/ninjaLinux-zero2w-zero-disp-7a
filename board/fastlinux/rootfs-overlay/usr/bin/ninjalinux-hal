@@ -6,12 +6,31 @@ if [ "$(id -u)" != 0 ]; then
 fi
 case "${1:-}" in
  start)
-  config="${2:-/data/hal/logic.hal}"
+  shift
+  config=/data/hal/logic.hal
+  if [ "$#" -gt 0 ] && [ "$1" != --rtlib ]; then
+   config="$1"
+   shift
+  fi
+  # Only documented additional module-directory options are accepted.
+  n=0
+  for argument in "$@"; do
+   if [ "$n" -eq 0 ]; then
+    [ "$argument" = --rtlib ] || { echo 'Expected --rtlib DIRECTORY' >&2; exit 2; }
+    n=1
+   else
+    resolved="$(readlink -f "$argument")" || exit 2
+    [ -d "$resolved" ] || { echo 'Missing app RT module directory' >&2; exit 2; }
+    case "$resolved" in /data/*) ;; *) echo 'App RT modules must be under /data' >&2; exit 2;; esac
+    n=0
+   fi
+  done
+  [ "$n" -eq 0 ] || { echo 'Missing --rtlib directory' >&2; exit 2; }
   [ -f "$config" ] || { echo "Missing configuration: $config" >&2; exit 1; }
   # Pass the filename as an argument, never as interpolated shell source.
   ulimit -r 99
   ulimit -l unlimited
-  exec su -p -s /bin/sh ahal -c 'exec /opt/automation-hal/bin/ahal run --mode realtime --cpu-config /opt/automation-hal/share/automation-hal/cpu-layout.json "$1"' sh "$config"
+  exec su -p -s /bin/sh ahal -c 'exec /opt/automation-hal/bin/ahal run --mode realtime --cpu-config /opt/automation-hal/share/automation-hal/cpu-layout.json "$@"' sh "$@" "$config"
   ;;
- *) echo 'Usage: ninjalinux-hal start [configuration.hal]' >&2; exit 2;;
+ *) echo 'Usage: ninjalinux-hal start [configuration.hal] [--rtlib /data/apps/APP/rtlib]' >&2; exit 2;;
 esac
