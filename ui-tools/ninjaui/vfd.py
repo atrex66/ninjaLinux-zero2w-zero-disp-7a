@@ -4,6 +4,7 @@ import math
 from PySide6.QtCore import Property, Qt, QSize, Slot
 from PySide6.QtGui import QColor, QPainter, QPen, QPixmap
 from PySide6.QtWidgets import QWidget
+from .glow import soften
 
 # The web simulator's fourteen strokes, in its 24 x 32 character coordinates.
 SEGMENTS = dict(zip('abcdefgmhijkln', (
@@ -203,17 +204,7 @@ class VfdDisplay(QWidget):
                     painter.drawLine(22, 30, 21, 32)
             painter.restore()
 
-    @staticmethod
-    def _soften(image, radius):
-        # Two smooth resamples approximate a soft bloom in native Qt code.
-        # No Python pixel loops, graphics scene or continuously running effect.
-        divisor = max(1.0, radius*image.devicePixelRatioF())
-        small = image.scaled(max(1, round(image.width()/divisor)),
-                             max(1, round(image.height()/divisor)),
-                             Qt.AspectRatioMode.IgnoreAspectRatio,
-                             Qt.TransformationMode.SmoothTransformation)
-        return small.scaled(image.size(), Qt.AspectRatioMode.IgnoreAspectRatio,
-                            Qt.TransformationMode.SmoothTransformation)
+    _soften = staticmethod(soften)
 
     def _render(self, pixmap):
         painter = QPainter(pixmap)

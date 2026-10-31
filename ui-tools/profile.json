@@ -5,5 +5,6 @@
   "modules": ["QtCore", "QtGui", "QtWidgets", "QtNetwork", "QtOpenGL", "QtOpenGLWidgets"],
   "widgets": ["QWidget", "QMainWindow", "QFrame", "QLabel", "QPushButton", "QToolButton", "QCheckBox", "QRadioButton", "QLineEdit", "QTextEdit", "QPlainTextEdit", "QSpinBox", "QDoubleSpinBox", "QSlider", "QDial", "QProgressBar", "QLCDNumber", "QComboBox", "QListWidget", "QTreeWidget", "QTableWidget", "QListView", "QTreeView", "QTableView", "QGroupBox", "QTabWidget", "QStackedWidget", "QScrollArea", "QSplitter", "QAbstractScrollArea", "QCalendarWidget", "QDateEdit", "QTimeEdit", "QDateTimeEdit", "QDialogButtonBox", "QMenuBar", "QMenu", "QStatusBar", "QToolBar", "QDockWidget", "QOpenGLWidget"],
   "layouts": ["QVBoxLayout", "QHBoxLayout", "QGridLayout", "QFormLayout", "QStackedLayout"],
-  "custom_widgets": {"StatusLed": "QWidget", "AxisDisplay": "QLabel", "TouchButton": "QPushButton", "NumericPad": "QWidget", "VfdDisplay": "QWidget"}
+  "custom_widget_bases": {"LedButton": ["QPushButton", "TouchButton"]},
+  "custom_widgets": {"StatusLed": "QWidget", "AxisDisplay": "QLabel", "TouchButton": "QPushButton", "NumericPad": "QWidget", "VfdDisplay": "QWidget", "LedButton": "QPushButton", "LedLabel": "QLabel"}
 }

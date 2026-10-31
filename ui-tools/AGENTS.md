@@ -52,6 +52,14 @@ point/comma emission and vanish at zero brightness; test high-DPI rendering
 when changing its compositing or scaling. Preserve VFD-ORIGIN.md attribution;
 do not claim the approximation is the original Hunor character ROM.
 
+LED hosts live in ninjaui/led.py, the common bloom helper in ninjaui/glow.py,
+and the shared hold-button base in ninjaui/touch.py. Preserve re-exports from
+ninjaui.widgets, native QPushButton icon/Unicode/signals, independent feedback
+state, minimum touch geometry and transparent LED hit-testing. Resource-backed
+templates must copy their .qrc/PNG assets when created, without overwriting
+existing files. Do not promise arbitrary Unicode glyph coverage: test the exact
+target font or supply an original/appropriately licensed PNG icon.
+
 ## HAL boundary
 
 - Widget imports/constructors must never import hal or connect to a machine.

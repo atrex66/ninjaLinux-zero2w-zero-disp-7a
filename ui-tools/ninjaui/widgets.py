@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 """Designer-friendly widgets. No network, HAL, or output side effects."""
 import math
-from PySide6.QtCore import Property, Qt, QTimer, Signal, Slot, QSize
+from PySide6.QtCore import Property, Qt, Signal, Slot, QSize
 from PySide6.QtGui import QColor, QPainter, QFont
 from PySide6.QtWidgets import QWidget, QLabel, QPushButton, QLineEdit, QGridLayout
 
@@ -103,45 +103,6 @@ class AxisDisplay(QLabel):
     halPin = Property(str, lambda s: s._pin, lambda s, v: setattr(s, '_pin', v))
 
 
-class TouchButton(QPushButton):
-    """Large button with a separate one-second longPressed signal.
-
-    QPushButton.clicked keeps its standard meaning and also occurs on release
-    after a long press. Connect only longPressed for hold-only actions.
-    """
-    longPressed = Signal()
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setMinimumSize(140, 64)
-        self.setText('Button')
-        self._timer = QTimer(self)
-        self._timer.setSingleShot(True)
-        self._timer.setTimerType(Qt.TimerType.PreciseTimer)
-        self._timer.setInterval(1000)
-        self._timer.timeout.connect(self._held)
-        self.pressed.connect(self._timer.start)
-        self.released.connect(self._timer.stop)
-
-    def _held(self):
-        if self.isDown() and self.isEnabled():
-            self.longPressed.emit()
-
-    def changeEvent(self, event):
-        if not self.isEnabled():
-            self._timer.stop()
-        super().changeEvent(event)
-
-    def focusOutEvent(self, event):
-        self._timer.stop()
-        super().focusOutEvent(event)
-
-    def mouseMoveEvent(self, event):
-        if not self.rect().contains(event.position().toPoint()):
-            self._timer.stop()
-        super().mouseMoveEvent(event)
-
-
 class NumericPad(QWidget):
     """Embedded decimal input; emits a value without writing any machine state."""
     accepted = Signal(float)
@@ -204,3 +165,6 @@ class NumericPad(QWidget):
 
 # Re-export keeps one stable Designer/uic header for the entire widget group.
 from .vfd import VfdDisplay
+
+from .touch import TouchButton
+from .led import LedButton, LedLabel

@@ -7,7 +7,7 @@ from pathlib import Path
 import stat
 from PySide6.QtCore import QObject, QTimer
 from PySide6.QtWidgets import QWidget
-from .widgets import AxisDisplay, StatusLed, VfdDisplay
+from .widgets import AxisDisplay, StatusLed, VfdDisplay, LedButton, LedLabel
 
 
 def existing_hal_api():
@@ -26,8 +26,10 @@ class HalReader(QObject):
     def __init__(self, api, window, report, parent=None):
         super().__init__(parent)
         self.api, self.report = api, report
-        widgets = [w for w in window.findChildren(QWidget) if isinstance(w, (AxisDisplay, StatusLed, VfdDisplay))]
+        widgets = [w for w in window.findChildren(QWidget) if isinstance(w, (AxisDisplay, StatusLed, VfdDisplay, LedButton, LedLabel))]
         for widget in widgets:
+            if isinstance(widget, LedButton):
+                widget.setFollowButton(False)
             widget.setConnected(False)
         self.bindings = [(w, w.halPin) for w in widgets if w.halPin]
         self.timer = QTimer(self)
@@ -41,7 +43,7 @@ class HalReader(QObject):
         for widget, pin in self.bindings:
             try:
                 value = self.api.get_value(pin)
-                if isinstance(widget, StatusLed):
+                if isinstance(widget, (StatusLed, LedButton, LedLabel)):
                     if not isinstance(value, (bool, int)):
                         raise ValueError('LED expects a bit/integer pin')
                     widget.setActive(bool(value))

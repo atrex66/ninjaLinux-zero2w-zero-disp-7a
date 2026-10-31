@@ -79,6 +79,8 @@ python ninjaui_tools.py preview work/panel.ui --offscreen --screenshot work/pane
 
 | Elem | Szerkeszthető tulajdonságok | Jelzések, viselkedés |
 |---|---|---|
+| `LedButton` | `text`, `icon`, `iconSize`, `checkable`, `followButton`, LED-tulajdonságok | LED-es érintőgomb kapcsoló-, nyomógomb- vagy független visszajelzőmóddal; örökölt egy másodperces tartás |
+| `LedLabel` | Szokásos QLabel- és LED-tulajdonságok | Unicode-os felirat állapotjelzővel; nincs kattintási/kimeneti művelet |
 | `StatusLed` | `active`, `connected`, `halPin` | Aktívan zöld; kapcsolat nélkül szürke `?`; kimenetet nem ír |
 | `AxisDisplay` | `value`, `decimals` (0–6), `axisLabel`, `suffix`, `connected`, `halPin` | Általános számkijelzés; kapcsolat nélkül `—`; nincs koordináta-/szerszámlogika |
 | `TouchButton` | Szokásos QPushButton-tulajdonságok | Egy másodperces tartásra `longPressed()`; felengedéskor a szokásos `clicked()` is megmarad |
@@ -105,6 +107,71 @@ képhivatkozásokat. Ez előzetes ellenőrzés: nem bizonyítja minden Qt-tulajd
 elrendezés és grafikus működés hardveres helyességét. A `.ui` és a plugin
 megbízható alkalmazásforrásnak tekintendő, nem elkülönítetten futtatott bemenet.
 A tényleges célgépen is ellenőrizni kell a kész alkalmazást.
+
+## LED-es gombok, feliratok és ikonok
+
+![Világító LED-es gombok Unicode- és PNG-ikonnal, állapotfeliratokkal](screenshots/led.png)
+
+```sh
+python ninjaui_tools.py new --led work/led/panel.ui
+python ninjaui_tools.py designer work/led/panel.ui
+python ninjaui_tools.py preview work/led/panel.ui
+```
+
+A **LedButton** és **LedLabel** a Designer **ninjaLinux** csoportjában található.
+A `new --led` a formmal együtt a `.qrc` fájlt és a saját MIT power-ikon PNG-jét
+is átmásolja egy külön szerkeszthető projektbe. Meglévő erőforrást nem ír felül.
+A szokásos `build` export a lefordított ikont is csomagolja, így nem kell hozzá
+asztali ikontéma vagy SVG-modul.
+
+Mindkét elemen állítható tulajdonságok, a hozzájuk tartozó setterekkel:
+
+| Tulajdonság | Jelentés |
+|---|---|
+| `active`, `connected` | A LED állapota és az adat érvényessége; kapcsolat nélkül szürke `?` |
+| `ledColor`, `offColor` | Világító és nem világító lencseszín |
+| `ledDiameter`, `ledOnRight` | Lencseátmérő (6–48 logikai pixel) és jobb/bal oldali elhelyezés |
+| `glow`, `glowRadius`, `glowStrength` | Gyorsítótárazott, VFD-jellegű derengés; 0–24-es sugár és 0–100-as erősség |
+| `brightness` | Kibocsátott fényerő, 0–100 |
+| `halPin` | Választható, csak olvasó bit/egész visszajelző pin |
+
+A `LedButton` örökli a QPushButton `icon`, `iconSize`, `text`, `font`, `clicked`,
+`pressed`, `released`, `toggled` és kapcsolófunkcióit, valamint a TouchButton
+1 másodperces `longPressed` jelzését. A LED nem fogja el az érintést.
+Alapból `followButton=True`: kapcsológombnál a `checked` állapotot követi,
+sima nyomógombnál a lenyomás idejére világít. Független visszajelzéshez
+`followButton=False`, majd `setActive(bool)` használható. A `LedLabel` megőrzi
+a QLabel szöveg-, betű- és igazítási tulajdonságait; műveletet nem indít.
+Önmagában egyik elem sem ír hardverkimenetet.
+
+A `--hal-read` kikapcsolja a `followButton` követést, és csak a LED-et frissíti
+a meglévő pinből. A gomb kattintása és `checked` állapota helyi GUI-állapot,
+nem hardverparancs és nem kimeneti visszaigazolás. Hiányzó pinadatnál
+kapcsolat nélküli jelzés látszik, nem téves kikapcsolt állapot.
+
+### Unicode-jelek és a betűkészlet
+
+A Qt Unicode-szöveget kezel, de **az UTF-8 kódolás nem jelenti azt, hogy minden
+jelhez van rajzolat a betűkészletben**. A célképben DejaVu Sans van.
+Az ellenőrzött DejaVu Sans fájlban a `▶` (U+25B6), `■` (U+25A0) és `⚠` (U+26A0)
+megtalálható; a `⏻` (U+23FB) és `💧` (U+1F4A7) hiányzik. Ezért a mintában a
+power-jel PNG. Támogatott jelet közvetlenül a gomb `text` mezőjébe írhatsz,
+vagy a szokásos `icon` mezőben választhatsz erőforrásként tárolt PNG-t.
+[Qt betűhelyettesítési dokumentáció](https://doc.qt.io/qt-6/qfont.html).
+
+A konkrét betűfájlt külön ellenőrizheted:
+
+```sh
+python ninjaui_tools.py font-check "▶■⚠" --font-file /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
+```
+
+Célgépre vonatkozó ellenőrzéshez a Pi tényleges `.ttf` fájljának PC-re másolt
+példányát használd: a PC több betűkészlete különben elfedheti a hiányt.
+A parancs Unicode-kódpontonként `OK`/`MISSING` eredményt ír, hiány esetén 1-es
+kilépési kóddal. Nem nyit látható ablakot és nem telepít betűkészletet.
+Ez egyedi karakterlefedettség, nem színes emoji-, összetett jelsorozat- vagy
+teljes írásrendszer-teszt. Biztosan azonos megjelenéshez PNG-erőforrás választható;
+további betűkészlet beépítése külön alkalmazás-/rendszerképmódosítás.
 
 ## Hunor-jellegű VFD-kijelző
 
@@ -229,10 +296,11 @@ python -m unittest discover -s tests
 ```
 
 Ellenőrzés 2026-10-31-én, Linux/amd64, Python 3.13, PC-s PySide6 6.11.2:
-21 sikeres teszt, tényleges generált UI-/erőforrás-futtatással,
+30 sikeres teszt, tényleges generált UI-/erőforrás-futtatással,
 Designer-regisztrációval és formbetöltéssel, beviteli/tartási próbával, VFD-karakter/pont/vessző/formázás/gyorsítótár
-ellenőrzésével és ál-HAL-adatok hibakezelésével. A Designer offscreen módban megnyitotta a formot.
+ellenőrzésével, LED-es kapcsoló/nyomógomb/visszajelzés, Unicode/PNG-export,
+betűlefedettség és ál-HAL-adatok hibakezelésének próbájával. A Designer offscreen módban megnyitotta a formot.
 A panel a gép PySide6 6.8.2.1 környezetével is exportálható és futott.
-Mindkét panellap és a VFD-minta 1024×600-as képét szemrevételezéssel ellenőriztük.
+Mindkét panellap, a VFD- és LED-minta 1024×600-as képét szemrevételezéssel ellenőriztük.
 Windows-, fizikai érintési, EGLFS/OpenGL- és élő Pi-HAL-próba ebben a körben
 nem történt.

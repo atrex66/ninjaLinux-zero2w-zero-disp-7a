@@ -76,6 +76,8 @@ python ninjaui_tools.py preview work/panel.ui --offscreen --screenshot work/pane
 
 | Element | Editable properties | Signals / behavior |
 |---|---|---|
+| `LedButton` | `text`, `icon`, `iconSize`, `checkable`, `followButton`, LED properties | Touch button with local toggle/momentary LED or independent feedback; inherited one-second hold |
+| `LedLabel` | Standard QLabel properties and LED properties | Unicode-capable status label; no click/output action |
 | `StatusLed` | `active`, `connected`, `halPin` | Green when active; grey `?` when disconnected; no output writes |
 | `AxisDisplay` | `value`, `decimals` (0–6), `axisLabel`, `suffix`, `connected`, `halPin` | Generic numeric label; disconnected data displays `—`; no coordinate/tool logic |
 | `TouchButton` | Standard QPushButton properties | `longPressed()` after a one-second hold; standard `clicked()` still fires on release |
@@ -99,6 +101,70 @@ unrecognized custom declarations and unsupported resource paths. It is a
 conservative preflight, not proof that every Qt property, layout or graphics
 path will work on hardware. UI files and plugins are trusted application source,
 not sandboxed input. Check the generated app on the actual target before use.
+
+## LED buttons, labels and icons
+
+![Glowing LED buttons with Unicode and PNG icons, plus status labels](screenshots/led.png)
+
+```sh
+python ninjaui_tools.py new --led work/led/panel.ui
+python ninjaui_tools.py designer work/led/panel.ui
+python ninjaui_tools.py preview work/led/panel.ui
+```
+
+The new **LedButton** and **LedLabel** elements are in Designer's **ninjaLinux**
+group. `new --led` copies the form, its `.qrc` and original MIT power-icon PNG
+into a separate editable project. It refuses to overwrite existing assets.
+Export them with the normal `build` command; the compiled icon travels with
+its bundle and needs no desktop icon theme or SVG module.
+
+Both widgets expose these editable properties and matching setters:
+
+| Property | Meaning |
+|---|---|
+| `active`, `connected` | LED state and valid-data flag; disconnected shows a grey `?` |
+| `ledColor`, `offColor` | Active and unlit lens colors |
+| `ledDiameter`, `ledOnRight` | Lens diameter (6–48 logical px) and right/left position |
+| `glow`, `glowRadius`, `glowStrength` | Cached VFD-style bloom, 0–24 px radius and 0–100 strength |
+| `brightness` | Emitted-light intensity, 0–100 |
+| `halPin` | Optional read-only bit/integer feedback pin |
+
+`LedButton` inherits the normal QPushButton `icon`, `iconSize`, `text`, `font`,
+`clicked`, `pressed`, `released`, `toggled` and checkable behavior, plus
+TouchButton's one-second `longPressed`. Its LED never intercepts touches.
+With `followButton=True` (default), a checkable button follows `checked`; a
+non-checkable one lights while pressed. Set `followButton=False` for independent
+feedback through `setActive(bool)`. `LedLabel` retains QLabel text/font/alignment
+behavior and has no action. Changing these widgets alone never writes hardware.
+
+With `--hal-read`, the reader disables `followButton` and updates only the LED
+from the named existing pin. A button's checked/clicked state is still local UI
+state; it is not a hardware command or proof of an output state. Missing pin
+data shows disconnected, not a false OFF indication.
+
+### Unicode symbols and font coverage
+
+Qt text accepts Unicode; **UTF-8 is an encoding, not a guarantee that every
+symbol has a glyph**. The target image includes DejaVu Sans. In the tested
+DejaVu Sans file, `▶` (U+25B6), `■` (U+25A0) and `⚠` (U+26A0) are available;
+`⏻` (U+23FB) and `💧` (U+1F4A7) are missing. The example therefore uses a PNG
+power icon. Put a supported symbol directly into the button's `text` property,
+or select a resource PNG through Designer's standard `icon` property.
+[Qt font fallback documentation](https://doc.qt.io/qt-6/qfont.html).
+
+Check an explicit font file before relying on a symbol:
+
+```sh
+python ninjaui_tools.py font-check "▶■⚠" --font-file /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
+```
+
+For a target-specific check, use a copy of the Pi's actual `.ttf` file on the PC;
+a richer PC font collection can otherwise hide a missing target glyph. The
+command reports `OK`/`MISSING` per Unicode code point and returns 1 for missing
+characters. It runs without a visible window and does not install fonts.
+This checks individual glyph coverage, not emoji colors, multi-character
+sequences or full-script shaping. For reliable appearance across installations,
+use a PNG resource; additional fonts require explicit application/image work.
 
 ## Hunor-style VFD display
 
@@ -220,9 +286,10 @@ python -m unittest discover -s tests
 ```
 
 Validated on 2026-10-31 with Linux/amd64, Python 3.13 and PC PySide6 6.11.2:
-21 tests passed, including actual generated UI/resource execution, Designer
-registration/form loading, input/hold behavior, VFD glyph/point/comma/formatting/cache behavior and fake-HAL stale data.
+30 tests passed, including actual generated UI/resource execution, Designer
+registration/form loading, input/hold behavior, VFD glyph/point/comma/formatting/cache behavior LED toggle/momentary/feedback behavior, Unicode/PNG export, explicit font coverage
+and fake-HAL stale data.
 The Designer opened the supplied form in the offscreen backend. The panel was
-also exported/run with the host's PySide6 6.8.2.1. Screenshots of both panel pages and the VFD showcase
+also exported/run with the host's PySide6 6.8.2.1. Screenshots of both panel pages, the VFD showcase and the LED showcase
 were visually inspected. These are PC checks: Windows, physical touch, EGLFS/
 OpenGL and the live Pi HAL adapter were not tested in this change.

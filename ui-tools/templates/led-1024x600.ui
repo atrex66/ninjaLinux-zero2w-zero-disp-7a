@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>NinjaLedPanel</class>
+ <widget class="QWidget" name="NinjaLedPanel">
+  <property name="geometry"><rect><x>0</x><y>0</y><width>1024</width><height>600</height></rect></property>
+  <property name="windowTitle"><string>ninjaLinux / LED controls</string></property>
+  <property name="styleSheet"><string>QWidget { background: #101c22; color: #e5edf8; font-family: DejaVu Sans; font-size: 22px; } QLabel#titleLabel { font-size: 28px; font-weight: bold; } QLabel#statusLabel { color: #8ba6c7; font-size: 16px; } QPushButton { background: #183345; border: 1px solid #37586c; border-radius: 14px; padding: 12px; } QPushButton:checked { background: #214a50; border-color: #40bca0; } QPushButton:pressed { background: #30646b; } LedLabel { background: #142b36; border: 1px solid #37586c; border-radius: 14px; }</string></property>
+  <layout class="QVBoxLayout" name="mainLayout">
+   <property name="spacing"><number>18</number></property>
+   <property name="leftMargin"><number>24</number></property><property name="rightMargin"><number>24</number></property><property name="topMargin"><number>24</number></property><property name="bottomMargin"><number>24</number></property>
+   <item><widget class="QLabel" name="titleLabel"><property name="text"><string>ninjaLinux / Glowing LED controls</string></property></widget></item>
+   <item><widget class="QLabel" name="helpLabel"><property name="text"><string>Local preview · toggle / momentary / independent feedback</string></property></widget></item>
+   <item><layout class="QGridLayout" name="controlLayout">
+    <property name="horizontalSpacing"><number>22</number></property><property name="verticalSpacing"><number>22</number></property>
+    <item row="0" column="0"><widget class="LedButton" name="startButton"><property name="text"><string>▶ Start / Unicode</string></property><property name="minimumSize"><size><width>0</width><height>108</height></size></property><property name="checked"><bool>true</bool></property></widget></item>
+    <item row="0" column="1"><widget class="LedButton" name="iconButton"><property name="text"><string>PNG icon</string></property><property name="minimumSize"><size><width>0</width><height>108</height></size></property><property name="icon"><iconset resource="led_icons.qrc"><normaloff>:/ninjaui/power.png</normaloff>:/ninjaui/power.png</iconset></property><property name="iconSize"><size><width>32</width><height>32</height></size></property><property name="ledColor" stdset="0"><color><red>65</red><green>177</green><blue>255</blue></color></property></widget></item>
+    <item row="1" column="0"><widget class="LedButton" name="momentaryButton"><property name="text"><string>■ Momentary / nyomógomb</string></property><property name="checkable"><bool>false</bool></property><property name="minimumSize"><size><width>0</width><height>108</height></size></property><property name="ledColor" stdset="0"><color><red>255</red><green>186</green><blue>93</blue></color></property></widget></item>
+    <item row="1" column="1"><widget class="LedButton" name="feedbackButton"><property name="text"><string>⚠ Independent LED</string></property><property name="checkable"><bool>false</bool></property><property name="followButton" stdset="0"><bool>false</bool></property><property name="active" stdset="0"><bool>true</bool></property><property name="minimumSize"><size><width>0</width><height>108</height></size></property><property name="ledColor" stdset="0"><color><red>255</red><green>140</green><blue>64</blue></color></property></widget></item>
+    <item row="2" column="0"><widget class="LedLabel" name="coolantLabel"><property name="text"><string>Hűtővíz / Coolant</string></property><property name="active" stdset="0"><bool>true</bool></property><property name="minimumSize"><size><width>0</width><height>100</height></size></property><property name="ledColor" stdset="0"><color><red>65</red><green>177</green><blue>255</blue></color></property></widget></item>
+    <item row="2" column="1"><widget class="LedLabel" name="offlineLabel"><property name="text"><string>Nincs kapcsolat / Offline</string></property><property name="connected" stdset="0"><bool>false</bool></property><property name="ledOnRight" stdset="0"><bool>false</bool></property><property name="minimumSize"><size><width>0</width><height>100</height></size></property></widget></item>
+   </layout></item>
+   <item><widget class="QLabel" name="statusLabel"><property name="text"><string>OFFLINE · no HAL connection</string></property></widget></item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget><class>LedButton</class><extends>QPushButton</extends><header>ninjaui.widgets</header></customwidget>
+  <customwidget><class>LedLabel</class><extends>QLabel</extends><header>ninjaui.widgets</header></customwidget>
+ </customwidgets>
+ <resources><include location="led_icons.qrc"/></resources>
+ <connections/>
+</ui>

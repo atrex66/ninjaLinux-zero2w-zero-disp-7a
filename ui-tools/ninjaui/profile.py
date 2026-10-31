@@ -57,6 +57,8 @@ def check(path):
             if not re.fullmatch(r'[A-Za-z_][A-Za-z_0-9]*', name) or name in names:
                 raise ValueError(f'Invalid or duplicate objectName: {name}')
             names.add(name)
+        if node.tag == 'iconset' and node.get('theme') and not any((n.text or '').startswith(':/') for n in node):
+            raise ValueError('Theme-only icons are unavailable in this image; use a PNG resource')
         if node.tag in ('pixmap', 'normaloff', 'normalon', 'disabledoff', 'disabledon', 'activeoff', 'activeon', 'selectedoff', 'selectedon'):
             if node.text and not node.text.startswith(':/'):
                 raise ValueError('Images must use a .qrc resource path (:/...), not a local file')
@@ -69,7 +71,8 @@ def check(path):
         name = custom.findtext('class')
         if name not in PROFILE['custom_widgets'] or name in declared:
             raise ValueError(f'Unknown or duplicate custom declaration: {name}')
-        if custom.findtext('extends') != PROFILE['custom_widgets'][name] or custom.findtext('header') != 'ninjaui.widgets':
+        bases = PROFILE.get('custom_widget_bases', {}).get(name, [PROFILE['custom_widgets'][name]])
+        if custom.findtext('extends') not in bases or custom.findtext('header') != 'ninjaui.widgets':
             raise ValueError(f'{name}: use the profile base class and header ninjaui.widgets')
         declared[name] = True
     used = {n.get('class') for n in root.iter('widget')} & set(PROFILE['custom_widgets'])

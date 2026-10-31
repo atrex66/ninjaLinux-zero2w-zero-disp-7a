@@ -1,5 +1,20 @@
 ninjaLinux-zero2w-zero-disp-7a - changes / változások
 
+2026-10-31 - Glowing LED buttons and labels / Világító LED-es gombok és feliratok
+  EN: Add LedButton/LedLabel with cached VFD-style bloom, adjustable state,
+      lens color/size/side and brightness. Support native PNG icons/Unicode,
+      toggle/momentary following and independent read-only HAL feedback.
+      Add --led showcase, asset-preserving project creation and explicit
+      font-check command; reject theme-only icons. Keep touch-button API.
+  HU: LedButton/LedLabel gyorsítótárazott VFD-jellegű fénnyel, állítható
+      állapottal, színnel/mérettel/oldallal és fényerővel. PNG/Unicode ikon,
+      kapcsoló-/nyomógombkövetés és független, csak olvasó HAL-visszajelzés.
+      --led minta, erőforrásmásoló projektlétrehozás, font-check parancs;
+      csak ikontémára támaszkodó ikon elutasítva. TouchButton API megmaradt.
+  Check: 30 PC tests, including native icon export independent of sources,
+         Hungarian/symbol text, LED states, feedback isolation, cache and
+         target-font code-point checks. No target deployment or font changes.
+
 2026-10-31 - VFD phosphor glow / VFD fényudvar
   EN: Replace the wide-outline halo with two smoothly resampled, additive
       bloom layers and a paler phosphor core. Expose glowRadius/glowStrength

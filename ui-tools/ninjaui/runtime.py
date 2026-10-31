@@ -10,7 +10,7 @@ import sys
 from PySide6.QtCore import QTimer, qVersion
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QApplication, QWidget, QMainWindow, QLabel, QStackedWidget
-from .widgets import AxisDisplay, NumericPad, StatusLed, TouchButton, VfdDisplay
+from .widgets import AxisDisplay, NumericPad, StatusLed, TouchButton, VfdDisplay, LedButton, LedLabel
 
 
 def main():
@@ -42,7 +42,7 @@ def main():
     keypad = window.findChild(NumericPad, 'keypad')
     edit = window.findChild(TouchButton, 'editButton')
     axes = [w for w in window.findChildren(QWidget) if isinstance(w, (AxisDisplay, VfdDisplay))]
-    leds = window.findChildren(StatusLed)
+    leds = [w for w in window.findChildren(QWidget) if isinstance(w, (StatusLed, LedButton, LedLabel))]
     # Optional sample wiring; unrelated forms need not use these object names.
     if pages and keypad and edit and axes:
         def show_editor():

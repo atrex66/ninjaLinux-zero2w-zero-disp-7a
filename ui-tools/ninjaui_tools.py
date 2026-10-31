@@ -10,7 +10,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from ninjaui.profile import ROOT, PROFILE, check
+from ninjaui.profile import ROOT, PROFILE, check, read_xml
 
 
 def qt_tool(name, arguments):
@@ -37,7 +37,7 @@ def build(form, output):
         resource_modules = {qrc.stem+'_rc' for qrc in resources}
         for qrc in resources:
             qt_tool('rcc', [qrc, '-o', stage / (qrc.stem+'_rc.py')])
-        for node in ast.walk(ast.parse((stage/'compiled_ui.py').read_text())):
+        for node in ast.walk(ast.parse((stage/'compiled_ui.py').read_text(encoding='utf-8'))):
             if isinstance(node, ast.ImportFrom):
                 allowed = {'PySide6.'+m for m in PROFILE['modules']} | {'ninjaui.widgets'}
                 if node.module not in allowed:
@@ -70,7 +70,11 @@ def main():
     new.add_argument('form', type=Path)
     templates = new.add_mutually_exclusive_group()
     templates.add_argument('--blank', action='store_true')
+    templates.add_argument('--led', action='store_true', help='Use the LED button/label showcase')
     templates.add_argument('--vfd', action='store_true', help='Use the Hunor-style VFD showcase')
+    fonts = commands.add_parser('font-check', help='Check individual code points in an explicit target font file')
+    fonts.add_argument('text')
+    fonts.add_argument('--font-file', type=Path, required=True)
     edit = commands.add_parser('designer', help='Open the PySide6 Designer with ninjaLinux widgets')
     edit.add_argument('form', type=Path)
     validate = commands.add_parser('check', help='Validate a .ui without importing Qt')
@@ -87,12 +91,37 @@ def main():
     args = p.parse_args()
     try:
         if args.command == 'new':
-            name = 'vfd-1024x600.ui' if args.vfd else ('blank-1024x600.ui' if args.blank else 'panel-1024x600.ui')
+            name = 'led-1024x600.ui' if args.led else ('vfd-1024x600.ui' if args.vfd else ('blank-1024x600.ui' if args.blank else 'panel-1024x600.ui'))
             template = ROOT/'templates'/name
-            args.form.parent.mkdir(parents=True, exist_ok=True)
-            with args.form.open('xb') as out:
-                out.write(template.read_bytes())
+            _, resources = check(template)
+            files = {args.form: template}
+            for qrc in resources:
+                files[args.form.parent/qrc.relative_to(template.parent)] = qrc
+                for item in read_xml(qrc).iter('file'):
+                    source = (qrc.parent/item.text).resolve()
+                    files[args.form.parent/source.relative_to(template.parent)] = source
+            if any(target.exists() for target in files):
+                raise ValueError('A form or asset already exists; choose a new project directory')
+            for target, source in files.items():
+                target.parent.mkdir(parents=True, exist_ok=True)
+                with target.open('xb') as out:
+                    out.write(source.read_bytes())
             print(args.form)
+        elif args.command == 'font-check':
+            os.environ['QT_QPA_PLATFORM'] = 'offscreen'
+            from PySide6.QtGui import QGuiApplication, QRawFont, QFont
+            app = QGuiApplication([])
+            font = QRawFont(str(args.font_file.resolve()), 24, QFont.HintingPreference.PreferDefaultHinting)
+            if not font.isValid():
+                raise ValueError('Cannot load the specified font file')
+            missing = False
+            for character in dict.fromkeys(args.text):
+                if character.isspace():
+                    continue
+                supported = font.supportsCharacter(ord(character))
+                print(f'U+{ord(character):04X}: '+('OK' if supported else 'MISSING'))
+                missing |= not supported
+            return int(missing)
         elif args.command == 'check':
             check(args.form)
             print('PASS: ninjaLinux 1024x600 form profile')
