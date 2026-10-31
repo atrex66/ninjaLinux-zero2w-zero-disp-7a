@@ -41,5 +41,3 @@ class TouchButton(QPushButton):
         if not self.rect().contains(event.position().toPoint()):
             self._timer.stop()
         super().mouseMoveEvent(event)
-
-
