@@ -1,5 +1,17 @@
 ninjaLinux-zero2w-zero-disp-7a - changes / változások
 
+2026-10-31 - Optional USB application cartridge / Opcionális USB alkalmazás-cartridge
+  EN: Add opt-in built-in USB storage support and a boot-only autostart.json
+      selector. Run one valid Python/native cartridge using the existing UI
+      supervisor; read-only media and RAM application state. No hotplug launch.
+      Fall back to the built-in UI on missing/invalid/ambiguous cartridges.
+  HU: Fordításkor választható USB-tároló támogatás és egyszeri bootkori
+      autostart.json felismerés. Python/natív cartridge a meglévő supervisorral,
+      csak olvasható pendrive, RAM alkalmazásállapot; nincs hotplug indítás.
+      Hiányzó/hibás/többértelmű cartridge esetén beépített felület.
+  Check: Offline tests and Buildroot Kconfig resolution; bilingual guide and
+         copyable PySide6 cartridge. Full image/physical USB/RT tests pending.
+
 2026-10-31 - Glowing LED buttons and labels / Világító LED-es gombok és feliratok
   EN: Add LedButton/LedLabel with cached VFD-style bloom, adjustable state,
       lens color/size/side and brightness. Support native PNG icons/Unicode,

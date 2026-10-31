@@ -41,7 +41,12 @@ for kdir in "$BUILD_DIR"/linux-*; do
   profile=rt-wifi
   if grep -q '^BR2_PACKAGE_HOSTAPD=y$' "$BR2_CONFIG"; then profile=rt-wifi-ap; fi
  fi
- python3 "$BR2_EXTERNAL_FASTLINUX_PATH/scripts/validate-config.py" "$kdir/.config" "$profile"
+ python3 "$BR2_EXTERNAL_FASTLINUX_PATH/scripts/validate-config.py" "$kdir/.config" "$profile" "$(grep -c '^BR2_PACKAGE_NINJALINUX_USB_AUTOSTART=y$' "$BR2_CONFIG" || true)"
 done
 
 python3 "$BR2_EXTERNAL_FASTLINUX_PATH/scripts/configure-wifi-image.py" target "$BR2_CONFIG" "$TARGET_DIR"
+
+# Optional boot-time USB override: absent from base images.
+if ! grep -q '^BR2_PACKAGE_NINJALINUX_USB_AUTOSTART=y$' "$BR2_CONFIG"; then
+ rm -f "$TARGET_DIR/etc/init.d/S30usb-app" "$TARGET_DIR/usr/libexec/ninjalinux-usb-app" "$TARGET_DIR/usr/libexec/ninjalinux-usb-launch"
+fi

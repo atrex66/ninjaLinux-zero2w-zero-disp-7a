@@ -1,0 +1,6 @@
+config BR2_PACKAGE_NINJALINUX_USB_AUTOSTART
+	bool "ninjaLinux boot-time USB application override"
+	depends on BR2_PACKAGE_PYTHON3
+	help
+	  Scan USB storage once at boot for autostart.json. Keep root unchanged.
+	  scripts/build.sh adds the required built-in storage fragment.

@@ -25,7 +25,7 @@ if grep -q '^BR2_PACKAGE_BRCMFMAC_SDIO_FIRMWARE_RPI_WIFI=y$' "$OUT/.config"; the
  profile=rt-wifi
  if grep -q '^BR2_PACKAGE_HOSTAPD=y$' "$OUT/.config"; then profile=rt-wifi-ap; fi
 fi
-python3 "$(dirname "$0")/validate-config.py" "$OUT/build/linux-custom/.config" "$profile"
+python3 "$(dirname "$0")/validate-config.py" "$OUT/build/linux-custom/.config" "$profile" "$(grep -c '^BR2_PACKAGE_NINJALINUX_USB_AUTOSTART=y$' "$OUT/.config" || true)"
 if [ "$profile" != rt ]; then
  ! grep -q '^dtoverlay=disable-wifi$' "$OUT/images/rpi-firmware/config.txt"
  test -x "$TARGET/etc/init.d/S36wifi"
@@ -41,6 +41,15 @@ if [ "$profile" != rt ]; then
 else
  grep -q '^dtoverlay=disable-wifi$' "$OUT/images/rpi-firmware/config.txt"
  ! test -e "$TARGET/etc/init.d/S36wifi"
+fi
+if grep -q '^BR2_PACKAGE_NINJALINUX_USB_AUTOSTART=y$' "$OUT/.config"; then
+ test -x "$TARGET/etc/init.d/S30usb-app"
+ test -x "$TARGET/usr/libexec/ninjalinux-usb-app"
+ test -x "$TARGET/usr/libexec/ninjalinux-usb-launch"
+else
+ ! test -e "$TARGET/etc/init.d/S30usb-app"
+ ! test -e "$TARGET/usr/libexec/ninjalinux-usb-app"
+ ! test -e "$TARGET/usr/libexec/ninjalinux-usb-launch"
 fi
 cmp "$OUT/images/Image" "$OUT/build/linux-custom/arch/arm64/boot/Image"
 "$OUT/host/bin/mdir" -i "$OUT/images/boot.vfat" :: > "$OUT/images/boot-list.txt"

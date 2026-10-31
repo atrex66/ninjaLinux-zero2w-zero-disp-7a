@@ -21,6 +21,12 @@ Product photos: [Waveshare](https://www.waveshare.net/). Images are linked from 
 
 [Where to buy the Zero-DISP-7A: EU country guide](docs/display-sourcing-eu.md)
 
+## USB application cartridge (optional)
+
+Boot a Python/PySide6 or native application directly from a pre-inserted USB
+stick containing `autostart.json`, keeping the SD system unchanged. With no
+valid cartridge, the built-in app starts. [Build, example and operation](docs/usb-cartridge.md).
+
 ## System
 
 | Item | Configuration |

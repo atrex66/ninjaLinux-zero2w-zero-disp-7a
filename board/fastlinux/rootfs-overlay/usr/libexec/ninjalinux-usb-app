@@ -1,0 +1,132 @@
+#!/usr/bin/python3
+"""Optional boot-only USB application selection. No shell command evaluation."""
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import time
+
+STATE = Path('/run/ninjalinux-usb-app')
+SYS = Path('/sys/class/block')
+FILESYSTEMS = ('vfat', 'ext4')
+
+
+def contained(root, name):
+    if not isinstance(name, str) or not name or Path(name).is_absolute():
+        raise ValueError('Expected a nonempty relative path')
+    path = (root / name).resolve(strict=True)
+    if not path.is_relative_to(root.resolve()):
+        raise ValueError('Path escapes USB volume')
+    return path
+
+
+def manifest(root):
+    path = root / 'autostart.json'
+    if path.is_symlink() or path.stat().st_size > 16384:
+        raise ValueError('Invalid manifest file')
+    data = json.loads(path.read_text(encoding='utf-8'))
+    if not isinstance(data, dict) or set(data) - {'version', 'type', 'program', 'args', 'cwd'}:
+        raise ValueError('Unknown manifest fields')
+    if type(data.get('version')) is not int or data['version'] != 1:
+        raise ValueError('Expected version 1')
+    kind = data.get('type')
+    if kind not in ('python3', 'native'):
+        raise ValueError('type must be python3 or native')
+    program = contained(root, data.get('program'))
+    if not program.is_file():
+        raise ValueError('Program must be a file')
+    cwd = contained(root, data.get('cwd', '.'))
+    if not cwd.is_dir():
+        raise ValueError('cwd must be a directory')
+    args = data.get('args', [])
+    if not isinstance(args, list) or len(args) > 128 or any(
+            not isinstance(a, str) or '\0' in a for a in args):
+        raise ValueError('args must be a string array')
+    if kind == 'native' and not os.access(program, os.X_OK):
+        raise ValueError('Native program is not executable')
+    argv = (['/usr/bin/python3'] if kind == 'python3' else []) + [str(program)] + args
+    return {'argv': argv, 'cwd': str(cwd)}
+
+
+def devices():
+    """Only USB-backed sd disks/partitions; never the SD root/data device."""
+    found = []
+    for block in sorted(SYS.glob('sd*')):
+        if not any(p.name.startswith('usb') for p in block.resolve().parents):
+            continue
+        # Use partitions when present; allow a filesystem on the whole disk.
+        if not (block / 'partition').exists() and any(
+                (p / 'partition').exists() for p in SYS.glob(block.name + '*')):
+            continue
+        found.append('/dev/' + block.name)
+    return found
+
+
+def run(argv):
+    try:
+        return subprocess.run(argv, check=False, timeout=3, stdout=subprocess.DEVNULL,
+                              stderr=subprocess.DEVNULL).returncode == 0
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+
+
+def prepare():
+    STATE.mkdir(mode=0o700, parents=True, exist_ok=True)
+    marker = STATE / 'scanned'
+    if marker.exists():
+        return
+    marker.touch()  # No rescanning until reboot, even when no valid stick exists.
+    selections = []
+    mounted = []
+    seen = set()
+    deadline = time.monotonic() + 3.0
+    while True:
+        for device in devices():
+            if device in seen:
+                continue
+            seen.add(device)
+            root = STATE / ('volume-' + Path(device).name)
+            root.mkdir(mode=0o700, exist_ok=True)
+            for fs in FILESYSTEMS:
+                options = 'ro,nodev,nosuid,' + ('utf8=1' if fs == 'vfat' else 'noload')
+                if run(['mount', '-t', fs, '-o', options, device, str(root)]):
+                    mounted.append(root)
+                    try:
+                        selection = manifest(root)
+                        selections.append((root, selection))
+                        print('USB application candidate:', device, flush=True)
+                    except (ValueError, OSError, UnicodeError, RecursionError) as error:
+                        print(device, str(error), flush=True)
+                    break
+        if time.monotonic() >= deadline:
+            break
+        time.sleep(0.1)
+    selected = selections[0] if len(selections) == 1 else None
+    for root in mounted:
+        if selected is None or root != selected[0]:
+            run(['umount', str(root)])
+    if selected:
+        (STATE / 'selected.json').write_text(json.dumps(selected[1]), encoding='utf-8')
+    else:
+        print('No unique valid USB application; using built-in application', flush=True)
+
+
+def launch():
+    selection = json.loads((STATE / 'selected.json').read_text(encoding='utf-8'))
+    home = STATE / 'home'
+    home.mkdir(mode=0o700, exist_ok=True)
+    os.environ.update(HOME=str(home), XDG_CACHE_HOME=str(home / 'cache'),
+                      XDG_CONFIG_HOME=str(home / 'config'), XDG_DATA_HOME=str(home / 'data'),
+                      PYTHONDONTWRITEBYTECODE='1', NINJALINUX_USB_APP='1')
+    os.chdir(selection['cwd'])
+    os.execv(selection['argv'][0], selection['argv'])
+
+
+if __name__ == '__main__':
+    if sys.argv[1:] == ['prepare']:
+        prepare()
+    elif sys.argv[1:] == ['launch']:
+        launch()
+    else:
+        raise SystemExit('Usage: ninjalinux-usb-app prepare|launch')

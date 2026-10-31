@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "type": "python3",
+  "program": "app/main.py",
+  "args": [],
+  "cwd": "app"
+}

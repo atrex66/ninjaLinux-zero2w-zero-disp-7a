@@ -21,6 +21,13 @@ Termékfotók: [Waveshare](https://www.waveshare.net/). A képek a beszállító
 
 [Zero-DISP-7A beszerzés: EU-országonkénti útmutató](docs/display-sourcing-eu.md)
 
+## USB alkalmazás-cartridge (opcionális)
+
+Bekapcsoláskor bent lévő, `autostart.json` fájlt tartalmazó pendrive-ról induló
+Python/PySide6 vagy natív alkalmazás, az SD-rendszer módosítása nélkül.
+Érvényes cartridge nélkül a beépített felület indul.
+[Fordítás, minta és használat](docs/usb-cartridge.hu.md).
+
 ## Rendszer
 
 | Összetevő | Beállítás |

@@ -28,6 +28,10 @@ case "$mode" in
  cpp) app=/usr/bin/fastlinux-demo;;
  *) app=/usr/bin/fastlinux-pyside-demo;;
 esac
+if [ -x /usr/libexec/ninjalinux-usb-app ] && [ -f /run/ninjalinux-usb-app/selected.json ]; then
+ # Keep the existing supervisor/affinity. The wrapper execs the selected app.
+ app=/usr/libexec/ninjalinux-usb-launch
+fi
 if [ "$(cat /sys/devices/system/cpu/isolated 2>/dev/null)" = 2-3 ]; then
  taskset -c 2 "$app" >>/tmp/fastlinux-ui.log 2>&1 &
 else
