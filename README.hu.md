@@ -2,6 +2,8 @@
 
 Magyar · **[English](README.md)**
 
+[v0.1.0-rc1 letöltése: SD-kép, ellenőrzőösszegek és a hozzá tartozó források](https://github.com/atrex66/ninjaLinux-zero2w-zero-disp-7a/releases/tag/v0.1.0-rc1)
+
 Gyorsan induló PREEMPT_RT Linux Raspberry Pi Zero 2 W és Waveshare
 Zero-DISP-7A számára: Python/PySide6 felület, hardveresen gyorsított EGLFS/KMS
 grafika, USB érintés és leválasztott LinuxCNC-alapú Automation HAL.

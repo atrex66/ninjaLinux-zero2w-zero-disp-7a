@@ -2,6 +2,8 @@
 
 **[Magyar / Hungarian](README.hu.md)** · English
 
+[Download release candidate v0.1.0-rc1: SD image, checksums and corresponding sources](https://github.com/atrex66/ninjaLinux-zero2w-zero-disp-7a/releases/tag/v0.1.0-rc1)
+
 A fast-boot PREEMPT_RT Linux appliance for Raspberry Pi Zero 2 W and Waveshare
 Zero-DISP-7A, with Python/PySide6, hardware-accelerated EGLFS/KMS graphics,
 USB touch and standalone LinuxCNC-derived Automation HAL.
