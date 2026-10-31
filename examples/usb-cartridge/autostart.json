@@ -1,5 +1,6 @@
 {
   "version": 1,
+  "writable": true,
   "type": "python3",
   "program": "app/main.py",
   "args": [],

@@ -26,10 +26,13 @@ def manifest(root):
     if path.is_symlink() or path.stat().st_size > 16384:
         raise ValueError('Invalid manifest file')
     data = json.loads(path.read_text(encoding='utf-8'))
-    if not isinstance(data, dict) or set(data) - {'version', 'type', 'program', 'args', 'cwd'}:
+    if not isinstance(data, dict) or set(data) - {'version', 'type', 'program', 'args', 'cwd', 'writable'}:
         raise ValueError('Unknown manifest fields')
     if type(data.get('version')) is not int or data['version'] != 1:
         raise ValueError('Expected version 1')
+    writable = data.get('writable', False)
+    if type(writable) is not bool:
+        raise ValueError('writable must be true or false')
     kind = data.get('type')
     if kind not in ('python3', 'native'):
         raise ValueError('type must be python3 or native')
@@ -46,7 +49,7 @@ def manifest(root):
     if kind == 'native' and not os.access(program, os.X_OK):
         raise ValueError('Native program is not executable')
     argv = (['/usr/bin/python3'] if kind == 'python3' else []) + [str(program)] + args
-    return {'argv': argv, 'cwd': str(cwd)}
+    return {'argv': argv, 'cwd': str(cwd), 'writable': writable, 'root': str(root)}
 
 
 def devices():
@@ -94,7 +97,7 @@ def prepare():
                     mounted.append(root)
                     try:
                         selection = manifest(root)
-                        selections.append((root, selection))
+                        selections.append((root, selection, device, fs))
                         print('USB application candidate:', device, flush=True)
                     except (ValueError, OSError, UnicodeError, RecursionError) as error:
                         print(device, str(error), flush=True)
@@ -106,15 +109,41 @@ def prepare():
     for root in mounted:
         if selected is None or root != selected[0]:
             run(['umount', str(root)])
+    if selected and selected[1]['writable']:
+        root, selection, device, fs = selected
+        # Reopen only the unique selected cartridge; never write while scanning.
+        options = 'rw,nodev,nosuid' + (',utf8=1' if fs == 'vfat' else '')
+        if not run(['umount', str(root)]) or not run(['mount', '-t', fs, '-o', options, device, str(root)]):
+            print('Writable cartridge mount failed; using built-in application', flush=True)
+            selected = None
+        else:
+            try:
+                if manifest(root) != selection:
+                    raise ValueError('Cartridge manifest changed during mount')
+                state_home(root)
+            except (ValueError, OSError) as error:
+                print('Cartridge state unavailable:', str(error), flush=True)
+                run(['umount', str(root)])
+                selected = None
     if selected:
         (STATE / 'selected.json').write_text(json.dumps(selected[1]), encoding='utf-8')
     else:
         print('No unique valid USB application; using built-in application', flush=True)
 
 
+def state_home(root):
+    root = root.resolve()
+    home = root / '.ninjalinux-state'
+    for directory in (home, home / 'cache', home / 'config', home / 'data'):
+        if not directory.resolve().is_relative_to(root):
+            raise ValueError('Cartridge state directory escapes the volume')
+        directory.mkdir(mode=0o700, exist_ok=True)
+    return home
+
+
 def launch():
     selection = json.loads((STATE / 'selected.json').read_text(encoding='utf-8'))
-    home = STATE / 'home'
+    home = state_home(Path(selection['root'])) if selection.get('writable') else STATE / 'home'
     home.mkdir(mode=0o700, exist_ok=True)
     os.environ.update(HOME=str(home), XDG_CACHE_HOME=str(home / 'cache'),
                       XDG_CONFIG_HOME=str(home / 'config'), XDG_DATA_HOME=str(home / 'data'),

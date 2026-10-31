@@ -35,7 +35,7 @@ class USBTests(unittest.TestCase):
         self.assertEqual(result['cwd'], str(self.root))
 
     def test_invalid_schema_and_paths_are_rejected(self):
-        for changes in (dict(version=True), dict(type='shell'), dict(program='/bin/sh'),
+        for changes in (dict(version=True), dict(writable='yes'), dict(type='shell'), dict(program='/bin/sh'),
                         dict(program='../escape'), dict(args='--unsafe'), dict(env={'PATH': '/bad'}),
                         dict(cwd='app.py'), dict(args=['bad\0arg'])):
             with self.subTest(changes=changes):
@@ -148,6 +148,40 @@ class USBTests(unittest.TestCase):
             usb.prepare()
         self.assertIn('ro,nodev,nosuid,noload', actions[1])
         self.assertTrue((state / 'selected.json').exists())
+
+    def test_writable_cartridge_persists_home_on_usb(self):
+        state, actions = self.boot({'/dev/sda1': self.data | dict(writable=True)})
+        self.assertEqual([a[0] for a in actions], ['mount', 'umount', 'mount'])
+        self.assertIn('rw,nodev,nosuid,utf8=1', actions[-1])
+        home = state / 'volume-sda1/.ninjalinux-state'
+        self.assertTrue((home / 'config').is_dir())
+        with patch.object(usb, 'STATE', state), patch.object(usb.os, 'chdir'), \
+                patch.object(usb.os, 'execv'), patch.dict(os.environ, {}, clear=True):
+            usb.launch()
+            self.assertEqual(os.environ['HOME'], str(home))
+            self.assertEqual(os.environ['XDG_CONFIG_HOME'], str(home / 'config'))
+
+    def test_writable_mount_failure_falls_back(self):
+        state = self.root / 'failed-run'
+        def command(argv):
+            if argv[0] == 'mount':
+                if argv[4].startswith('rw'):
+                    return False
+                root = Path(argv[-1])
+                (root / 'app.py').touch()
+                self.write(self.data | dict(writable=True), root)
+            return True
+        with patch.object(usb, 'STATE', state), \
+                patch.object(usb, 'devices', return_value=['/dev/sda1']), \
+                patch.object(usb, 'run', side_effect=command), \
+                patch.object(usb.time, 'monotonic', side_effect=[0, 4]):
+            usb.prepare()
+        self.assertFalse((state / 'selected.json').exists())
+
+    def test_persistent_state_cannot_escape_usb(self):
+        (self.root / '.ninjalinux-state').symlink_to('/tmp')
+        with self.assertRaises(ValueError):
+            usb.state_home(self.root)
 
     def test_mount_errors_are_bounded_and_report_failure(self):
         import subprocess

@@ -49,6 +49,7 @@ a pendrive nem telepít függőségeket.
 ```json
 {
   "version": 1,
+  "writable": true,
   "type": "python3",
   "program": "app/main.py",
   "args": [],
@@ -57,6 +58,9 @@ a pendrive nem telepít függőségeket.
 ```
 
 - `version`: jelenleg `1`.
+- `writable`: `true` esetén írható cartridge és azon tárolt beállítások;
+  `false` vagy hiányzó mező esetén csak olvasható cartridge, RAM-állapottal.
+  A mellékelt minta `true` értéket használ.
 - `type`: `python3` vagy `native`.
 - `program`: a pendrive gyökeréhez viszonyított programfájl.
 - `args`: opcionális szöveges argumentumlista, shell-feldolgozás nélkül.
@@ -82,18 +86,29 @@ Az útvonalak nem léphetnek ki a pendrive-ról. A JSON UTF-8 kódolású, BOM n
 4. Későbbi bedugás nem indít programot és nem vált alkalmazást. Cseréhez
    kapcsold ki a gépet. A futó alkalmazás alól ne húzd ki a pendrive-ot.
 
-A kiválasztott kötet `ro,nodev,nosuid` opciókkal, csak olvashatóan marad
-csatolva. FAT-on UTF-8 fájlnevekkel, ext4-en napló-visszajátszás nélkül
-(`noload`); ezért tisztán lecsatolt ext4 kötetet használj. Az alkalmazás közvetlenül onnan fut, a meglévő EGLFS/KMS környezetet
-és UI CPU-hozzárendelést használja. Kilépés vagy összeomlás után a meglévő
-supervisor ugyanazt az alkalmazást indítja újra, két másodperc várakozással.
-A hibás alkalmazás kikerülhető kikapcsolás és cartridge nélküli indítás útján.
+Felismerés közben minden kötet csak olvasható. A kiválasztott cartridge
+`writable: true` esetén újracsatolódik írhatóan (`rw,nodev,nosuid`);
+a többi kötetre a kereső nem ír. Az alkalmazás közvetlenül a pendrive-ról fut,
+a meglévő EGLFS/KMS környezetet és UI CPU-hozzárendelést használja. Kilépés
+vagy összeomlás után a supervisor ugyanazt az alkalmazást indítja újra,
+két másodperc várakozással. Hibás alkalmazás kikerülhető cartridge nélküli
+indítással. Sikertelen írható csatolás vagy állapotkönyvtár-létrehozás esetén
+a beépített alkalmazás indul.
 
-A `HOME` és az XDG cache/config/data könyvtárak `/run/ninjalinux-usb-app/home`
-alá, RAM-ba kerülnek; újraindításkor elvesznek. Python nem ír `.pyc` fájlokat.
-A gyökérpartíció továbbra is csak olvasható, az addon nem telepít alkalmazást
-és nem módosítja a `/data` konfigurációját. A rendszer szokásos szolgáltatásai
-(pl. SSH-kulcsok kezelése) ettől függetlenül tovább működnek.
+Írható módban a `HOME` a pendrive `.ninjalinux-state` könyvtára; az XDG cache,
+config és data ennek `cache`, `config`, `data` alkönyvtára. A szokásos Qt
+QSettings/XDG-beállítások így **a cartridge-on maradnak**, nem a belső `/data`
+alatt. A program saját, kifejezetten `/data/...` útvonalra írt fájljait ez
+nem irányítja át. Az app használjon QSettings-t, XDG-könyvtárakat vagy a saját
+cartridge-mappáját. Írható pendrive-ot szabályosan állíts le, mielőtt kihúzod.
+
+`writable: false` esetén a kötet `ro,nodev,nosuid` marad. FAT-on UTF-8
+fájlnevekkel, ext4-en napló-visszajátszás nélkül (`noload`); használj tisztán
+lecsatolt ext4 kötetet. A HOME/XDG-könyvtárak ilyenkor `/run/ninjalinux-usb-app/home`
+alatt RAM-ban vannak és újraindításkor elvesznek. Python egyik módban sem ír
+`.pyc` fájlokat. A gyökérpartíció továbbra is csak olvasható, az addon nem
+telepít alkalmazást és nem módosítja a belső `/data` konfigurációját. A rendszer
+szokásos szolgáltatásai (pl. SSH-kulcsok kezelése) ettől függetlenül működnek.
 Ez nem alkalmazás-sandbox: a cartridge a jelenlegi UI felhasználójával,
 rootként fut. Saját, megbízható alkalmazás-cartridge-ot használj.
 

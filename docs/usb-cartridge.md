@@ -48,6 +48,7 @@ image: dependencies are not installed from the cartridge.
 ```json
 {
   "version": 1,
+  "writable": true,
   "type": "python3",
   "program": "app/main.py",
   "args": [],
@@ -56,6 +57,9 @@ image: dependencies are not installed from the cartridge.
 ```
 
 - `version`: currently `1`.
+- `writable`: `true` enables writes and persistent cartridge settings.
+  `false` or an absent field keeps read-only media and RAM state.
+  The supplied example enables it.
 - `type`: `python3` or `native`.
 - `program`: program file, relative to the volume root.
 - `args`: optional array of strings, passed literally without shell evaluation.
@@ -81,18 +85,28 @@ Paths must remain inside the volume. Save JSON as UTF-8 without a BOM.
 4. Inserting a stick later never launches or switches applications. Power off
    to change cartridges. Do not unplug a stick while its application is running.
 
-The selected volume remains mounted read-only with `ro,nodev,nosuid`. Its app
-runs directly from USB with the existing EGLFS/KMS environment and UI CPU
-affinity. FAT uses UTF-8 filenames; ext4 disables journal replay (`noload`),
-so use a cleanly unmounted ext4 volume. The existing supervisor restarts the same app two seconds after it
-exits or crashes. To bypass a broken app, power off and boot without its stick.
+Discovery mounts all volumes read-only. Only the uniquely selected cartridge
+is reopened writable (`rw,nodev,nosuid`) when `writable: true`; other volumes
+are never written by the scanner. The app runs directly from USB using the
+existing EGLFS/KMS environment and UI affinity. The supervisor restarts it
+two seconds after exit/crash. Boot without the cartridge to bypass a broken
+app. Writable mount/state-directory failure selects the built-in app instead.
 
-`HOME` and XDG cache/config/data directories point into
-`/run/ninjalinux-usb-app/home` in RAM and are lost on reboot. Python bytecode
-writes are disabled. Root stays read-only; the addon does not install an app
-or alter `/data` configuration. Ordinary system services, including SSH key
-management, still operate independently. This is not an application sandbox:
-the cartridge runs as the existing UI user, root. Use trusted cartridges.
+In writable mode, `HOME` is `.ninjalinux-state` on the stick; XDG cache,
+config and data use its `cache`, `config` and `data` subdirectories. Standard
+Qt QSettings/XDG settings therefore **stay on the cartridge**, rather than in
+the internal `/data`. Explicit application writes to `/data/...` are not
+redirected: use QSettings, XDG locations or the cartridge's own directory.
+Shut down cleanly before removing writable media.
+
+With `writable: false`, the selected volume remains `ro,nodev,nosuid`. FAT uses
+UTF-8 filenames; ext4 disables journal replay (`noload`), so use a cleanly
+unmounted ext4 volume. HOME/XDG locations are then in RAM under
+`/run/ninjalinux-usb-app/home` and are lost on reboot. Python bytecode writes
+are disabled in both modes. Root stays read-only; the addon does not install
+an app or alter internal `/data` configuration. Ordinary services, including
+SSH key management, still operate independently. This is not a sandbox:
+cartridges run as the existing UI user, root. Use trusted cartridges.
 
 ## Diagnostics and verification
 

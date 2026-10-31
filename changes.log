@@ -1,5 +1,16 @@
 ninjaLinux-zero2w-zero-disp-7a - changes / változások
 
+2026-10-31 - Writable USB cartridges / Írható USB-cartridge
+  EN: Add optional writable:true to autostart.json. Scan read-only, reopen
+      only the selected cartridge writable, and keep HOME/XDG settings in
+      its .ninjalinux-state directory. Existing descriptors stay read-only;
+      the example enables persistent state. Failures use the built-in app.
+  HU: Opcionális writable:true: csak a kiválasztott cartridge lesz írható,
+      a HOME/XDG beállítások annak .ninjalinux-state könyvtárába kerülnek.
+      A régi leírók csak olvashatók maradnak; a minta tartós mentést használ.
+      Sikertelen csatolás/állapotkönyvtár esetén beépített alkalmazás.
+  Check: 14 offline cartridge tests; no physical USB or SD changes.
+
 2026-10-31 - Optional custom boot logo / Opcionális saját bootlogó
   EN: Add NINJALINUX_BOOT_LOGO PNG/SVG host conversion and embedded PSplash
       image, with separate build outputs and logo-change rebuilds. Start
