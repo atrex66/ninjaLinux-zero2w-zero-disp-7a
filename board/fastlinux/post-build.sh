@@ -19,8 +19,10 @@ sed -i '\|/bin/mount -o remount,rw /|d' "$TARGET_DIR/etc/inittab"
 rm -f "$TARGET_DIR/etc/init.d/S40network" "$TARGET_DIR/etc/init.d/S50crond" "$TARGET_DIR/etc/init.d/S11modules"
 # /var is provided by Buildroot as symlinks into /tmp; inspect at image validation.
 
-# Module-free kernel; remove unused module tools from the appliance image.
-rm -rf "$TARGET_DIR/lib/modules"
+# The base profile is module-free; rt-wifi needs its wireless modules.
+if ! grep -q '^BR2_PACKAGE_BRCMFMAC_SDIO_FIRMWARE_RPI_WIFI=y$' "$BR2_CONFIG"; then
+ rm -rf "$TARGET_DIR/lib/modules"
+fi
 
 chmod 700 "$TARGET_DIR/root"
 # Generic releases must not contain a developer key or a shared private host key.
@@ -35,5 +37,11 @@ for kdir in "$BUILD_DIR"/linux-*; do
  [ -f "$kdir/.config" ] || continue
  profile=normal
  grep -q '^CONFIG_PREEMPT_RT=y$' "$kdir/.config" && profile=rt
+ if grep -q '^BR2_PACKAGE_BRCMFMAC_SDIO_FIRMWARE_RPI_WIFI=y$' "$BR2_CONFIG"; then
+  profile=rt-wifi
+  if grep -q '^BR2_PACKAGE_HOSTAPD=y$' "$BR2_CONFIG"; then profile=rt-wifi-ap; fi
+ fi
  python3 "$BR2_EXTERNAL_FASTLINUX_PATH/scripts/validate-config.py" "$kdir/.config" "$profile"
 done
+
+python3 "$BR2_EXTERNAL_FASTLINUX_PATH/scripts/configure-wifi-image.py" target "$BR2_CONFIG" "$TARGET_DIR"

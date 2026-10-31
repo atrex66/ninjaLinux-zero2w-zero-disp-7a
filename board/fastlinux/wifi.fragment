@@ -1,0 +1,21 @@
+# Optional Zero 2 W SDIO radio; appended after the minimal RT fragments.
+# Load wireless modules after root is mounted so firmware files are available.
+CONFIG_MODULES=y
+CONFIG_WIRELESS=y
+CONFIG_WLAN=y
+CONFIG_WLAN_VENDOR_BROADCOM=y
+CONFIG_CFG80211=m
+# CONFIG_CFG80211_WEXT is not set
+CONFIG_BRCMUTIL=m
+CONFIG_BRCMFMAC=m
+CONFIG_BRCMFMAC_SDIO=y
+# CONFIG_BRCMFMAC_USB is not set
+# CONFIG_BRCMFMAC_PCIE is not set
+CONFIG_FW_LOADER=y
+# CONFIG_FW_LOADER_USER_HELPER is not set
+# Enabling modules must not reactivate unrelated options from the base snapshot.
+# CONFIG_TCP_CONG_BIC is not set
+# CONFIG_TCP_CONG_WESTWOOD is not set
+# CONFIG_TCP_CONG_HTCP is not set
+# CONFIG_BCM2835_SMI is not set
+# CONFIG_BCM2835_SMI_DEV is not set

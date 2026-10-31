@@ -1,5 +1,26 @@
 ninjaLinux-zero2w-zero-disp-7a - changes / változások
 
+2026-10-31 - Optional local Wi-Fi / Választható helyi Wi-Fi
+  EN: Add rt-wifi client and rt-wifi-ap local hand-controller AP build
+      profiles, separate output trees and image names. Keep the default RT
+      image Ethernet-only. Wireless modules load after root mount; use pinned
+      Zero 2 W 43436/43436s firmware. Optional background startup from /data
+      credentials on CPU0-1. AP: WPA2, 192.168.4.1, DHCP .20-.100; no gateway,
+      DNS forwarding, NAT, bridge or cloud service. Client DHCP also omits
+      default route/DNS. Preserve Ethernet and its controller connection.
+  HU: rt-wifi kliens és rt-wifi-ap helyi kézivezérlő-AP fordítási profil,
+      külön buildkönyvtárakkal és képnevekkel. Az alap RT-kép Ethernetes.
+      Wi-Fi modulbetöltés a gyökérpartíció után, rögzített 43436/43436s
+      firmware. /data alatti adatokkal választható háttérindítás CPU0-1-en.
+      AP: WPA2, 192.168.4.1, DHCP .20-.100; átjáró, DNS-továbbítás, NAT,
+      bridge és felhő nélkül. A kliens DHCP sem állít átjárót/DNS-t.
+      Az Ethernet és vezérlőkapcsolata megmarad.
+  Check: Three resolved Buildroot profiles, validated pinned RT/Wi-Fi kernel
+         configurations (only three wireless module options), firmware hash
+         and both board aliases, 14 offline routing/AP/lifecycle tests.
+         Full image build and physical association/IRQ/HAL timing pending.
+         No deployment, reboot or controller firmware change performed.
+
 2026-10-31 - Remote access documentation / Távoli elérés dokumentáció
   EN: Separate English/Hungarian SSHFS and original HALShow usage guides.
       Windows instructions cover OpenSSH Client, WinSCP's custom SFTP-server

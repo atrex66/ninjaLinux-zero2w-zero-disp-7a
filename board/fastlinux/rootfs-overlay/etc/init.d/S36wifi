@@ -1,0 +1,30 @@
+#!/bin/sh
+# Only installed in Wi-Fi profiles. No credentials means no connection worker.
+case "$1" in
+ start)
+  mode=station
+  if [ -s /data/wifi/hostapd.conf ]; then
+   [ ! -s /data/wifi/wpa_supplicant.conf ] || { echo 'Choose AP or station: keep only one Wi-Fi config enabled' >&2; exit 1; }
+   [ -x /usr/libexec/ninjalinux-wifi-ap ] || { echo 'AP needs an rt-wifi-ap build' >&2; exit 1; }
+   mode=ap
+  else
+   [ -s /data/wifi/wpa_supplicant.conf ] || exit 0
+   command -v wpa_supplicant >/dev/null || { echo 'Station mode needs an rt-wifi build' >&2; exit 1; }
+  fi
+  if [ -r /run/ninjalinux-wifi.pid ] && kill -0 "$(cat /run/ninjalinux-wifi.pid)" 2>/dev/null; then exit 0; fi
+  start-stop-daemon -S -q -b -m -p /run/ninjalinux-wifi.pid \
+   -x /usr/bin/taskset -- -c 0,1 /usr/libexec/ninjalinux-wifi "$mode" \
+   >>/tmp/wifi.log 2>&1
+  ;;
+ stop)
+  start-stop-daemon -K -q -p /run/ninjalinux-wifi.pid || true
+  start-stop-daemon -K -q -p /run/wpa_supplicant-wlan0.pid || true
+  start-stop-daemon -K -q -p /run/hostapd-wlan0.pid || true
+  start-stop-daemon -K -q -p /run/dnsmasq-wlan0.pid || true
+  interface=wlan0 /usr/libexec/ninjalinux-wifi-dhcp deconfig
+  rm -f /run/ninjalinux-wifi.pid /run/wpa_supplicant-wlan0.pid
+  ip link set wlan0 down 2>/dev/null || true
+  ;;
+ restart) "$0" stop; "$0" start;;
+ *) echo "Usage: $0 {start|stop|restart}" >&2; exit 2;;
+esac

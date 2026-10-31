@@ -28,9 +28,9 @@ have not been validated.
 | Storage | Read-only root; RAM-backed temporary files; 1 GiB persistent `/data` |
 | SD image | 1,678,770,176 bytes; compressed image 65.4 MiB |
 
-No desktop, X11, Wayland, login terminals, Wi-Fi, Bluetooth or audio output.
+The default `rt` image has no desktop, X11, Wayland, login terminals, Wi-Fi, Bluetooth or audio output.
 BusyBox init starts the GUI directly, without a systemd multi-user target.
-Required device drivers are built in. HAL userspace `.so` components are
+Required device drivers are built in for the default profile. HAL userspace `.so` components are
 separate from kernel modules. VC4 requires some ALSA/ASoC infrastructure;
 audio output is disabled in the device tree.
 
@@ -203,3 +203,9 @@ personalized test image, SD backups, local logs and personal keys are excluded.
 - [Windows: PowerShell SSH, WinSCP and WSL2 HALShow](docs/windows-remote.md)
 
 See [changes.log](changes.log) for the project change history. The application has its own repository and operator manuals.
+
+## Optional local Wi-Fi / hand-controller AP
+
+Choose at build time: `./scripts/build.sh rt-wifi` for a local Wi-Fi client, or `./scripts/build.sh rt-wifi-ap` for a dedicated WPA2 access point with DHCP for remote hand controllers. The default `rt` stays Ethernet-only. AP address: `192.168.4.1`; no internet gateway, DNS forwarding, bridge, NAT or cloud services are added. The hand-controller command protocol is a separate future layer.
+
+[Build profiles, provisioning and verification limits](docs/wifi.md). All three Buildroot profiles and the pinned kernel configurations were resolved; 14 offline tests and firmware alias/hash checks passed. A new complete SD image and physical Wi-Fi/AP/RT tests are still pending.

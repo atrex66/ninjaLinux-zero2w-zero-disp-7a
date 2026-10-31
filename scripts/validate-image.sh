@@ -20,7 +20,28 @@ test -f "$TARGET/opt/automation-hal/rtlib/ninja_latency.so"
 # Buildroot adds package users in its fakeroot image tree, after target-finalize.
 "$OUT/host/sbin/debugfs" -R 'cat /etc/passwd' "$OUT/images/rootfs.ext4" 2>/dev/null | grep -q '^ahal:x:1000:1000:'
 grep -q 'isolcpus=domain,managed_irq,2,3 irqaffinity=0,1' "$OUT/images/rpi-firmware/cmdline.txt"
-python3 "$(dirname "$0")/validate-config.py" "$OUT/build/linux-custom/.config" rt
+profile=rt
+if grep -q '^BR2_PACKAGE_BRCMFMAC_SDIO_FIRMWARE_RPI_WIFI=y$' "$OUT/.config"; then
+ profile=rt-wifi
+ if grep -q '^BR2_PACKAGE_HOSTAPD=y$' "$OUT/.config"; then profile=rt-wifi-ap; fi
+fi
+python3 "$(dirname "$0")/validate-config.py" "$OUT/build/linux-custom/.config" "$profile"
+if [ "$profile" != rt ]; then
+ ! grep -q '^dtoverlay=disable-wifi$' "$OUT/images/rpi-firmware/config.txt"
+ test -x "$TARGET/etc/init.d/S36wifi"
+ find "$TARGET/lib/modules" -name 'brcmfmac.ko*' -print | grep .
+ if [ "$profile" = rt-wifi-ap ]; then
+  test -x "$TARGET/usr/libexec/ninjalinux-wifi-ap"
+  test -x "$TARGET/usr/sbin/hostapd"
+  test -x "$TARGET/usr/sbin/dnsmasq"
+  ! test -e "$TARGET/etc/init.d/S80dnsmasq"
+ fi
+ if [ "$profile" = rt-wifi ]; then test -x "$TARGET/usr/sbin/wpa_supplicant"; fi
+ test -f "$TARGET/lib/firmware/brcm/brcmfmac43430b0-sdio.raspberrypi,model-zero-2-w.bin"
+else
+ grep -q '^dtoverlay=disable-wifi$' "$OUT/images/rpi-firmware/config.txt"
+ ! test -e "$TARGET/etc/init.d/S36wifi"
+fi
 cmp "$OUT/images/Image" "$OUT/build/linux-custom/arch/arm64/boot/Image"
 "$OUT/host/bin/mdir" -i "$OUT/images/boot.vfat" :: > "$OUT/images/boot-list.txt"
 ! grep -Ei 'Image-rt|config-normal|config-rt' "$OUT/images/boot-list.txt"

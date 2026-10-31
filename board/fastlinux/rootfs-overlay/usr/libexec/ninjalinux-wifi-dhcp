@@ -1,0 +1,28 @@
+#!/usr/bin/python3
+"""DHCP hook: lower-priority WLAN routes, without changing Ethernet or DNS."""
+import ipaddress,os,subprocess,sys
+
+def run(*args):
+    subprocess.run(['ip',*map(str,args)],check=True)
+
+def clear():
+    subprocess.run(['ip','-4','rule','del','priority','16600'],check=False,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+    subprocess.run(['ip','-4','route','flush','table','166'],check=False,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+    run('-4','route','flush','dev','wlan0')
+    run('-4','addr','flush','dev','wlan0')
+
+def main(event,env):
+    if env.get('interface')!='wlan0':raise ValueError('Only wlan0 is supported')
+    if event=='deconfig':
+        clear();return
+    if event not in ('bound','renew'):return
+    address=ipaddress.IPv4Interface(env['ip']+'/'+env.get('subnet','255.255.255.0'))
+    # Remove previous lease routes/address, including a changed address on renewal.
+    clear()
+    run('addr','add',address,'dev','wlan0','noprefixroute')
+    run('route','add',address.network,'dev','wlan0','src',address.ip,'metric','600')
+    # Replies to the Wi-Fi address must leave Wi-Fi even on the Ethernet LAN.
+    run('route','add',address.network,'dev','wlan0','src',address.ip,'table','166')
+    run('rule','add','priority','16600','from',str(address.ip)+'/32','lookup','166')
+
+if __name__=='__main__':main(sys.argv[1],os.environ)

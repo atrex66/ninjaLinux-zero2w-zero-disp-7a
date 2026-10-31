@@ -1,0 +1,38 @@
+#!/bin/sh
+set -eu
+conf=${NINJALINUX_WIFI_AP_CONFIG:-/data/wifi/hostapd.conf}
+# Validate before touching networking; reject duplicate/conflicting directives.
+python3 - "$conf" <<'PYCONFIG'
+from pathlib import Path
+import re,sys
+values={}
+for line in Path(sys.argv[1]).read_text().splitlines():
+    line=line.strip()
+    if not line or line.startswith('#'):continue
+    key,sep,value=line.partition('=');key=key.strip();value=value.strip()
+    if not sep or key in values:raise ValueError('Invalid or duplicate AP directive: '+key)
+    if key in ('bridge','bss','wds_bridge'):raise ValueError('Bridged/multi-BSS AP is unsupported')
+    values[key]=value
+for key,value in dict(interface='wlan0',driver='nl80211',wpa='2',wpa_key_mgmt='WPA-PSK',rsn_pairwise='CCMP',hw_mode='g').items():
+    if values.get(key)!=value:raise ValueError('AP directive required: '+key)
+if not re.fullmatch('[A-Z]{2}',values.get('country_code','')):raise ValueError('Set a valid country_code')
+if not 1<=len(values.get('ssid','').encode())<=32:raise ValueError('SSID must be 1-32 bytes')
+if not 1<=int(values.get('channel','0'))<=13:raise ValueError('Set a 2.4 GHz channel')
+password=values.get('wpa_passphrase','')
+if not 8<=len(password)<=63 or any(not 32<=ord(c)<=126 for c in password):
+    raise ValueError('Choose an 8-63 character ASCII passphrase')
+PYCONFIG
+ap_pid=
+cleanup() {
+ trap - EXIT INT TERM
+ [ -z "$ap_pid" ] || kill "$ap_pid" 2>/dev/null || true
+ start-stop-daemon -K -q -p /run/dnsmasq-wlan0.pid || true
+ ip -4 addr flush dev wlan0 || true
+}
+trap cleanup EXIT
+trap 'exit 0' INT TERM
+ip address replace 192.168.4.1/24 dev wlan0
+dnsmasq --conf-file=/etc/ninjalinux-wifi-ap.dnsmasq.conf
+hostapd -P /run/hostapd-wlan0.pid "$conf" &
+ap_pid=$!
+wait "$ap_pid"

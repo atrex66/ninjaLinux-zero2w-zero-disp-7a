@@ -28,9 +28,9 @@ még nincs ellenőrizve.
 | Tárolás | Csak olvasható root, ideiglenes fájlok RAM-ban, 1 GiB tartós `/data` |
 | SD-kép | 1 678 770 176 bájt; tömörítve 65,4 MiB |
 
-Nincs asztali környezet, X11, Wayland, bejelentkezési terminál, Wi-Fi,
+Az alap `rt` képen nincs asztali környezet, X11, Wayland, bejelentkezési terminál, Wi-Fi,
 Bluetooth vagy hangkimenet. A BusyBox init közvetlenül indítja a felületet;
-nincs systemd multi-user target. A szükséges eszközmeghajtók a kernelbe
+nincs systemd multi-user target. Az alapprofil szükséges eszközmeghajtói a kernelbe
 épülnek. A HAL userspace `.so` komponensei nem kernelmodulok. A VC4 miatt
 szükséges ALSA/ASoC alapok megmaradnak, a hangkimenetet a device tree tiltja.
 
@@ -208,3 +208,9 @@ nem részei a kiadásnak.
 - [Windows: PowerShell SSH, WinSCP és WSL2 HALShow](docs/windows-remote.hu.md)
 
 A projekt változásait a [changes.log](changes.log) tartalmazza. Az alkalmazás külön repóban, saját kezelési útmutatókkal készül.
+
+## Választható helyi Wi-Fi / kézivezérlő-AP
+
+Fordításkor választható: `./scripts/build.sh rt-wifi` helyi Wi-Fi klienshez, `./scripts/build.sh rt-wifi-ap` dedikált WPA2 AP-hoz és DHCP-hez távoli kézi vezérlők számára. Az alap `rt` Ethernetes marad. AP-cím: `192.168.4.1`; internetátjáró, DNS-továbbítás, bridge, NAT vagy felhős szolgáltatás nem kerül bele. A kézi vezérlők parancsprotokollja későbbi külön réteg.
+
+[Fordítási profilok, beállítás és ellenőrzési határok](docs/wifi.hu.md). A három Buildroot-profil és a rögzített kernel konfigurációja feloldva; 14 offline teszt és a firmware hash-/aliasellenőrzése sikeres. Új teljes SD-kép és fizikai Wi-Fi/AP/RT próba még nem készült.

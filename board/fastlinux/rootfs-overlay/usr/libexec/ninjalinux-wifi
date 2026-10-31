@@ -1,0 +1,17 @@
+#!/bin/sh
+set -eu
+# The firmware is on the mounted rootfs; never request it before that.
+modprobe brcmfmac
+n=0
+while [ ! -d /sys/class/net/wlan0 ]; do
+ n=$((n+1)); [ "$n" -le 100 ] || { echo 'wlan0 did not appear'; exit 1; }
+ sleep 0.2
+done
+ip link set wlan0 up
+# Avoid periodic power-save wakeups during RT operation; measure on target.
+iw dev wlan0 set power_save off || true
+if [ "${1:-station}" = ap ]; then exec /usr/libexec/ninjalinux-wifi-ap; fi
+wpa_supplicant -B -D nl80211 -i wlan0 -c /data/wifi/wpa_supplicant.conf \
+ -P /run/wpa_supplicant-wlan0.pid
+exec udhcpc -f -i wlan0 -p /run/ninjalinux-wifi.pid \
+ -s /usr/libexec/ninjalinux-wifi-dhcp

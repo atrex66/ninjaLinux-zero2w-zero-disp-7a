@@ -8,6 +8,7 @@ cp "$BOARD/cmdline.txt" "$BINARIES_DIR/rpi-firmware/cmdline.txt"
 for f in "$BINARIES_DIR/rpi-firmware/overlays/"*.dtbo; do
  case "${f##*/}" in vc4-kms-v3d.dtbo|disable-wifi.dtbo|disable-bt.dtbo|dwc2.dtbo) ;; *) rm -f "$f";; esac
 done
+python3 "$BR2_EXTERNAL_FASTLINUX_PATH/scripts/configure-wifi-image.py" boot "$BR2_CONFIG" "$BINARIES_DIR/rpi-firmware"
 # Persistent settings and later HAL configurations live outside the RO root.
 if [ ! -f "$BINARIES_DIR/data.ext4" ]; then
  truncate -s 1024M "$BINARIES_DIR/data.ext4"

@@ -9,3 +9,6 @@ board/fastlinux/rootfs-overlay/root/.ssh/authorized_keys
 
 __pycache__/
 *.pyc
+
+# Wi-Fi credentials are provisioned on /data, never in a generic image.
+board/fastlinux/rootfs-overlay/data/wifi/
